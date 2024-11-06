@@ -1,0 +1,83 @@
+{
+    "name": "locai-app3",
+    "private": true,
+    "version": "0.0.0",
+    "main": "./dist-electron/index.js",
+    "type": "module",
+    "homepage": "https://github.com/withcatai/node-llama-cpp",
+    "author": {
+        "name": "Author name",
+        "email": "email@example.com"
+    },
+    "scripts": {
+        "postinstall": "npm run models:pull",
+        "models:pull": "node-llama-cpp pull --dir ./models \"hf:bartowski/codegemma-2b-GGUF/codegemma-2b-Q8_0.gguf\"",
+        "start": "vite dev",
+        "start:build": "electron ./dist-electron",
+        "prebuild": "rimraf ./dist ./dist-electron ./release",
+        "build": "tsc && vite build && electron-builder --config ./electron-builder.ts",
+        "lint": "npm run lint:eslint",
+        "lint:eslint": "eslint --ext .js --ext .ts --report-unused-disable-directives .",
+        "format": "npm run lint:eslint -- --fix",
+        "clean": "rm -rf ./node_modules ./dist ./dist-electron ./release ./models"
+    },
+    "dependencies": {
+        "@radix-ui/react-icons": "^1.3.0",
+        "@radix-ui/react-label": "^2.1.0",
+        "@radix-ui/react-select": "^2.1.2",
+        "@radix-ui/react-separator": "^1.1.0",
+        "@radix-ui/react-slot": "^1.1.0",
+        "birpc": "^0.2.17",
+        "class-variance-authority": "^0.7.0",
+        "classnames": "^2.5.1",
+        "clsx": "^2.1.1",
+        "highlight.js": "^11.10.0",
+        "lifecycle-utils": "^1.7.0",
+        "markdown-it": "^14.1.0",
+        "node-llama-cpp": "^3.1.1",
+        "prettier-eslint": "^16.3.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-markdown": "^9.0.1",
+        "semver": "^7.6.3",
+        "tailwind-merge": "^2.5.4"
+    },
+    "devDependencies": {
+        "@tailwindcss/typography": "^0.5.15",
+        "@types/markdown-it": "^14.1.2",
+        "@types/react": "^18.3.5",
+        "@types/react-dom": "^18.3.0",
+        "@types/react-syntax-highlighter": "^15.5.13",
+        "@types/semver": "^7.5.8",
+        "@typescript-eslint/eslint-plugin": "^7.12.0",
+        "@typescript-eslint/parser": "^7.18.0",
+        "@vitejs/plugin-react": "^4.3.1",
+        "autoprefixer": "^10.4.20",
+        "electron": "^32.1.0",
+        "electron-builder": "^24.13.3",
+        "eslint": "^8.57.1",
+        "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-jsdoc": "^48.2.9",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "eslint-plugin-react-refresh": "^0.4.7",
+        "postcss": "^8.4.47",
+        "prettier": "3.3.3",
+        "react-syntax-highlighter": "^15.6.1",
+        "rimraf": "^6.0.1",
+        "tailwindcss": "^3.4.14",
+        "tailwindcss-animate": "^1.0.7",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.5",
+        "vite-plugin-electron": "^0.28.7",
+        "vite-plugin-electron-renderer": "^0.14.5",
+        "vite-plugin-svgr": "^4.2.0",
+        "zx": "^8.1.7"
+    },
+    "overrides": {
+        "electron-builder": {
+            "read-config-file": {
+                "config-file-ts": ">=0.2.8-rc1"
+            }
+        }
+    }
+}

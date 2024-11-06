@@ -1,0 +1,10 @@
+/.idea
+/.vscodebranch
+node_modules
+.DS_Store
+
+/dist
+/dist-electron
+/release
+/models
+/chat_session
