@@ -540,8 +540,6 @@ export const llmFunctions = {
                         }
                     };
 
-                    console.log(llmState.state.chatSession.simplifiedChat);
-
                     llmState.state = {
                         ...llmState.state,
                         chatSession: {
@@ -564,6 +562,15 @@ export const llmFunctions = {
                     };
                 }
             });
+        },
+        setChatSessionLoad() {
+            llmState.state = {
+                ...llmState.state,
+                chatSession: {
+                    ...llmState.state.chatSession,
+                    loaded: false
+                }
+            };
         }
     }
 } as const;

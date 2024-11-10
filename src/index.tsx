@@ -10,6 +10,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         {/* <App /> */}
         <App2 />
     </React.StrictMode>
+    // <App2 />
 );
 
 // Use contextBridge

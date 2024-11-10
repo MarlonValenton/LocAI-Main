@@ -4,16 +4,14 @@ import {useState} from "react";
 import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue} from "../../shadcncomponents/select";
 import {Button} from "../../shadcncomponents/Button";
 import {Label} from "../../shadcncomponents/Label";
-import Loader from "../../../icons/loader-2.svg?react";
 
 interface ModelSettingsProps {
     setSelectedModel: React.Dispatch<React.SetStateAction<string>>,
     selectedModel: string,
-    loading: boolean,
     loadModelAndSession(): Promise<void>
 }
 
-function ModelSettings({setSelectedModel, selectedModel, loading, loadModelAndSession}: ModelSettingsProps): JSX.Element {
+function ModelSettings({setSelectedModel, selectedModel, loadModelAndSession}: ModelSettingsProps): JSX.Element {
     const [modelFiles, setModelFiles] = useState<string[]>([]);
 
     if (modelFiles.length == 0) {
@@ -43,15 +41,9 @@ function ModelSettings({setSelectedModel, selectedModel, loading, loadModelAndSe
                     </Select>
                 </div>
 
-                {loading ? (
-                    <Button disabled>
-                        <Loader className="animate-spin" />
-                    </Button>
-                ) : (
-                    <Button onClick={() => loadModelAndSession()} disabled={selectedModel === ""}>
-                        Load Model
-                    </Button>
-                )}
+                <Button onClick={() => loadModelAndSession()} disabled={selectedModel === ""}>
+                    Load Model
+                </Button>
             </div>
         </div>
     );

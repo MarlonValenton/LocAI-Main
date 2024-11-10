@@ -74,6 +74,7 @@ export class ElectronLlmRpc {
         async loadChatHistory(chatHistory: ChatHistoryItem[], inputTokens: number, outputTokens: number) {
             await llmFunctions.chatSession.loadChatHistory(chatHistory, inputTokens, outputTokens);
         },
+        setChatSessionLoad: llmFunctions.chatSession.setChatSessionLoad,
         getState() {
             return llmState.state;
         },

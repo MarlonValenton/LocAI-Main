@@ -1,7 +1,6 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 import {useCallback, useEffect, useRef, useState} from "react";
-import {ChatHistoryItem, isChatModelResponseFunctionCall} from "node-llama-cpp";
 import Trash from "../icons/trash.svg?react";
 import FileExport from "../icons/file-export.svg?react";
 import Settings from "../icons/settings.svg?react";
@@ -20,13 +19,14 @@ function App2(): JSX.Element {
     const [isDarkMode, setDarkMode] = useState(false);
     const [chatSessionsAndFilenames, setChatSessionsAndFilenames] = useState<ChatSessionAndFilename[]>([]);
     const [selectedChatSession, setSelectedChatSession] = useState<ChatSession>();
-    const [selectedFilename, setSelectedFilename] = useState<string>();
     const [selectedModel, setSelectedModel] = useState("");
     const state = useExternalState(llmState);
     const {generatingResult} = state.chatSession;
     const chatAreaRef = useRef<HTMLDivElement>(null);
+    // const [loaded, setLoaded] = useState<boolean>(false);
 
     useEffect(() => {
+        console.log("Getting chat sessions from file system");
         getChatSessions().then((value) => setChatSessionsAndFilenames(value));
     }, []);
 
@@ -52,12 +52,11 @@ function App2(): JSX.Element {
                     console.log({newChatSessionAndFilename});
 
                     setSelectedChatSession(newChatSessionAndFilename.chatSession);
-                    setSelectedFilename(newChatSessionAndFilename.filename);
                     console.log("newChatSessionAndFilename set");
                     console.log("filename set");
 
                     if (newChatSessionAndFilename.chatSession.chatHistory) {
-                        saveChatSession(newChatSessionAndFilename.chatSession);
+                        saveChatSession(newChatSessionAndFilename);
                     }
 
                     return newChatSessionAndFilename;
@@ -69,6 +68,8 @@ function App2(): JSX.Element {
     }, [generatingResult]);
 
     useEffect(() => {
+        console.log("Scroll height changed");
+
         if (isScrolledToTheBottom()) {
             scrollToBottom();
         }
@@ -82,19 +83,21 @@ function App2(): JSX.Element {
                 const chatSession = chatSessionsAndFilenames[index]?.chatSession;
                 setSelectedChatSession(chatSession);
                 console.log("Selected chat session set");
-                setSelectedFilename(chatSessionsAndFilenames[index]?.filename);
-                console.log("Selected filename set");
                 setSelectedModel(chatSession!.modelPath);
                 console.log("Selected model set");
 
                 console.log(`${selectedChatSession?.modelName} === ${chatSession?.modelName}`);
 
+                await electronLlmRpc.setChatSessionLoad();
                 if (selectedChatSession?.modelName === chatSession?.modelName) {
                     console.log("Selected chat session is the same as the old one, loading Chat History immediately");
 
                     // await electronLlmRpc.loadModel(chatSession!.modelPath);
+                    console.log("Creating Context");
                     await electronLlmRpc.createContext();
+                    console.log("Creating Context Sequence");
                     await electronLlmRpc.createContextSequence();
+                    console.log("Loading Chat History");
                     await electronLlmRpc.loadChatHistory(chatSession!.chatHistory!, chatSession!.inputTokens, chatSession!.outputTokens);
                 } else {
                     console.log("Loading Model");
@@ -107,20 +110,84 @@ function App2(): JSX.Element {
                     await electronLlmRpc.loadChatHistory(chatSession!.chatHistory!, chatSession!.inputTokens, chatSession!.outputTokens);
                 }
             } else console.log("There are no chat sessions available");
+            updateChatSessions();
         },
         [chatSessionsAndFilenames, selectedChatSession]
     );
 
-    const saveChatSession = useCallback(
-        async (chatSession: ChatSession) => {
-            console.log("Saving chat session");
-            console.log(`Filename: ${selectedFilename}`);
-            console.log({chatSession});
+    const renameChatSession = useCallback(
+        (event: React.KeyboardEvent, index: number, chatSessionName: string, callback: () => void) => {
+            console.log("Renaming chat session");
 
-            await window.utils.saveChatSession(selectedFilename!, chatSession);
+            if (event.key === "Escape") {
+                console.log("Escape key entered. Removing input element");
+                callback();
+            } else if (event.key === "Enter") {
+                try {
+                    const newChatSessionsAndFilenames = chatSessionsAndFilenames.map((chatSessionAndFilename, i) => {
+                        if (i === index) {
+                            console.log(`Updating chat session of index ${index}`);
+
+                            const newChatSessionAndFilename: ChatSessionAndFilename = {
+                                ...chatSessionAndFilename,
+                                chatSession: {
+                                    ...chatSessionAndFilename.chatSession,
+                                    name: chatSessionName ? chatSessionName : chatSessionAndFilename.chatSession.name
+                                }
+                            };
+                            console.log({newChatSessionAndFilename});
+
+                            window.utils.chatSessionExists(newChatSessionAndFilename.filename).then((value) => {
+                                if (value === true) {
+                                    saveChatSession(newChatSessionAndFilename);
+                                } else {
+                                    throw Error("File does not exist");
+                                }
+                            });
+                            return newChatSessionAndFilename;
+                        } else return chatSessionAndFilename;
+                    });
+                    setChatSessionsAndFilenames(newChatSessionsAndFilenames);
+                } catch (err) {
+                    updateChatSessions();
+                }
+
+                callback();
+            }
         },
-        [selectedFilename]
+        [chatSessionsAndFilenames]
     );
+
+    const deleteChatSession = useCallback(
+        (index: number) => {
+            console.log(`Deleting chat session index ${index}`);
+
+            try {
+                const toDeleteChatSession = chatSessionsAndFilenames[index];
+                window.utils.chatSessionExists(toDeleteChatSession!.filename).then((value) => {
+                    if (value === true) {
+                        window.utils.deleteChatSession(toDeleteChatSession!.filename);
+                    } else {
+                        throw Error("File does not exist");
+                    }
+                });
+
+                const newChatSessionsAndFilenames = chatSessionsAndFilenames.filter((chatSession, i) => i !== index);
+                setChatSessionsAndFilenames(newChatSessionsAndFilenames);
+            } catch (err) {
+                updateChatSessions();
+            }
+        },
+        [chatSessionsAndFilenames]
+    );
+
+    const saveChatSession = useCallback(async (chatSessionAndFilename: ChatSessionAndFilename) => {
+        console.log("Saving chat session");
+        console.log(`Filename: ${chatSessionAndFilename.filename}`);
+        console.log({chatSessionAndFilename});
+
+        await window.utils.saveChatSession(chatSessionAndFilename.filename, chatSessionAndFilename.chatSession);
+    }, []);
 
     const isScrolledToTheBottom = useCallback(() => {
         if (chatAreaRef.current != null) {
@@ -149,9 +216,6 @@ function App2(): JSX.Element {
             setSelectedChatSession(newChatSessionAndFilename.chatSession);
             console.log("newChatSession set");
 
-            setSelectedFilename(newChatSessionAndFilename.filename);
-            console.log("Set newFilename as selectedFilename");
-
             setChatSessionsAndFilenames([...updatedChatSessionsAndFilenames, newChatSessionAndFilename]);
             console.log("Added newChatSession to existing chatSessions");
 
@@ -166,13 +230,6 @@ function App2(): JSX.Element {
     const createChatSessionFile = useCallback(async (modelFilePath: string) => {
         return await window.utils.createChatSessionFile(modelFilePath);
     }, []);
-
-    // const loadChatHistory = useCallback(async () => {
-    //     if (selectedChatSession?.modelPath === modelFilePath) {
-    //         console.log("Current model used is the same as the model to be loaded. Skipping model loading...");
-    //         await electronLlmRpc.loadChatHistory(modelFilePath, chatHistory, true);
-    //     } else await electronLlmRpc.loadChatHistory(modelFilePath, chatHistory, false);
-    // }, [selectedChatSession]);
 
     const stopActivePrompt = useCallback(() => {
         void electronLlmRpc.stopActivePrompt();
@@ -192,6 +249,14 @@ function App2(): JSX.Element {
         [generatingResult]
     );
 
+    const updateChatSessions = useCallback(() => {
+        console.log("Updating ChatSession list");
+
+        window.utils.getChatSessions().then((value) => {
+            setChatSessionsAndFilenames(value);
+        });
+    }, []);
+
     const onPromptInput = useCallback((currentText: string) => {
         void electronLlmRpc.setDraftPrompt(currentText);
     }, []);
@@ -205,19 +270,18 @@ function App2(): JSX.Element {
     const error = state.llama.error ?? state.model.error ?? state.context.error ?? state.contextSequence.error;
     const loading =
         state.selectedModelFilePath != null &&
-        error == null &&
         (!state.model.loaded || !state.llama.loaded || !state.context.loaded || !state.contextSequence.loaded || !state.chatSession.loaded);
     const loaded = state.chatSession.loaded;
     const showMessage = state.selectedModelFilePath == null || error != null || state.chatSession.simplifiedChat.length === 0;
-    console.log(`state.model.loaded = ${state.model.loaded}`);
-    console.log(`state.contextSequence.loaded = ${state.contextSequence.loaded}`);
-    console.log(`state.chatSession.loaded = ${state.chatSession.loaded}`);
+
     return (
         <div className="flex flex-row">
             <Sidebar
-                mainButton="New Chat"
+                mainButton="New chat session"
                 items={chatSessionsAndFilenames.map((value) => value.chatSession.name)}
                 OnSelectItem={loadChatSession}
+                renameChatSession={renameChatSession}
+                deleteChatSession={deleteChatSession}
             >
                 <SidebarButtonGroup>
                     <SideBarButton display="Clear Conversations" Icon={Trash} />

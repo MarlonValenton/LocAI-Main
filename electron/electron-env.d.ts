@@ -42,6 +42,14 @@ interface Window {
         /**
          * Save chat session to file
          */
-        saveChatSession(filename: string, chatSessionFile: ChatSession): Promise<void>
+        saveChatSession(filename: string, chatSessionFile: ChatSession): Promise<void>,
+        /**
+         * Check if file exists
+         */
+        chatSessionExists(filename: string): Promise<boolean>,
+        /**
+         * PERMANENTLY delete a file
+         */
+        deleteChatSession(filename: string): Promise<boolean>
     }
 }

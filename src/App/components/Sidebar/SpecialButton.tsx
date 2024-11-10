@@ -1,79 +1,73 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {useState} from "react";
+import React, {useRef, useState} from "react";
 import Chat from "../../../icons/message.svg?react";
-import Check from "../../../icons/check.svg?react";
-import Cancel from "../../../icons/x.svg?react";
-import Edit from "../../../icons/pencil.svg?react";
-import Delete from "../../../icons/trash.svg?react";
-import {Button} from "../../shadcncomponents/Button";
+import Dots from "../../../icons/dots.svg?react";
+import {DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem} from "../../shadcncomponents/dropdown-menu";
+import {Input} from "../../shadcncomponents/Input";
+import useClickOutside from "../../../hooks/useClickOutside";
 
 interface SpecialButtonProps {
     title: string,
-    onClick?(...args: any): void
+    index: number,
+    onClick(index: number): void,
+    onEnter(event: React.KeyboardEvent, index: number, chatSession: string, callback: () => void): void,
+    onDelete(index: number): void
 }
 
-function SpecialButton({title, onClick}: SpecialButtonProps): JSX.Element {
-    const [hoverEditDelete, setHoverEditDelete] = useState(false);
-    const [hoverConfirmCancel, setHoverConfirmCancel] = useState(false);
+function SpecialButton({title, index, onClick, onEnter, onDelete}: SpecialButtonProps): JSX.Element {
+    const [isEditMode, setIsEditMode] = useState<boolean>(false);
+    const [inputValue, setInputValue] = useState<string>("");
+    const ref = useRef<HTMLInputElement>(null);
+    useClickOutside(ref, () => setIsEditMode(false));
 
     return (
         <div
-            onClick={onClick}
-            className="flex h-[40px] w-full p-[10px] rounded-[5px] text-cblack dark:text-cwhite bg-foreground-dark
+            onClick={() => onClick(index)}
+            onKeyDownCapture={(e) => onEnter(e, index, inputValue, () => setIsEditMode(false))}
+            className="flex items-center h-[40px] w-full px-[10px] rounded-[5px] text-cblack dark:text-cwhite bg-foreground-dark
       dark:bg-background-light text-[15px] select-none hover:bg-foreground-dark/60 hover:dark:bg-white/20
       active:bg-foreground-dark/40 active:dark:bg-white/30 cursor-pointer"
-            onMouseEnter={() => setHoverEditDelete(true)}
-            onMouseLeave={() => setHoverEditDelete(false)}
         >
             <Chat className="mr-[6px] size-[20px] text-primary overflow-visible" />
-            <span className="truncate">{title}</span>
-
-            {hoverEditDelete && !hoverConfirmCancel ? (
+            {isEditMode ? (
+                <Input
+                    ref={ref}
+                    className="h-fit"
+                    placeholder={title}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => setInputValue(e.target.value)}
+                />
+            ) : (
+                <span className="truncate">{title}</span>
+            )}
+            {!isEditMode ? (
                 <div className="flex flex-1 justify-end items-center">
-                    <Button
-                        size="icon_tight"
-                        variant="transparent_full"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setHoverConfirmCancel(true);
-                        }}
-                    >
-                        <Edit className="text-icon-gray size-[20px] " />
-                    </Button>
-                    <Button
-                        size="icon_tight"
-                        variant="transparent_full"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setHoverConfirmCancel(true);
-                        }}
-                    >
-                        <Delete className="text-icon-gray size-[20px]" />
-                    </Button>
-                </div>
-            ) : hoverConfirmCancel ? (
-                <div className="flex flex-1 justify-end items-center">
-                    <Button
-                        size="icon_tight"
-                        variant="transparent_full"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setHoverConfirmCancel(false);
-                        }}
-                    >
-                        <Check className="text-positive size-[20px] " />
-                    </Button>
-                    <Button
-                        size="icon_tight"
-                        variant="transparent_full"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setHoverConfirmCancel(false);
-                        }}
-                    >
-                        <Cancel className="text-negative size-[20px]" />
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <Dots className="text-icon-gray size-[20px]" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Export</DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsEditMode(true);
+                                }}
+                            >
+                                Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(index);
+                                }}
+                                className="text-negative font-semibold focus:bg-negative/50 focus:text-negative"
+                            >
+                                Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             ) : (
                 ""

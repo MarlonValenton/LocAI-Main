@@ -31,5 +31,7 @@ contextBridge.exposeInMainWorld("utils", {
     createChatSessionFile: (modelPath: string): Promise<ChatSessionAndFilename> =>
         ipcRenderer.invoke("create-chat-session-file", modelPath),
     saveChatSession: (filename: string, chatSession: ChatSession): Promise<void> =>
-        ipcRenderer.invoke("save-chat-session", filename, chatSession)
+        ipcRenderer.invoke("save-chat-session", filename, chatSession),
+    chatSessionExists: (filename: string): Promise<boolean> => ipcRenderer.invoke("chat-session-exists", filename),
+    deleteChatSession: (filename: string): Promise<boolean> => ipcRenderer.invoke("delete-chat-session", filename)
 });

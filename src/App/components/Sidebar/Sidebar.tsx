@@ -12,10 +12,12 @@ interface SideBarProps {
     mainButton: string,
     items?: string[],
     children?: JSX.Element,
-    OnSelectItem(...args: any): void
+    OnSelectItem(index: number): void,
+    renameChatSession(event: React.KeyboardEvent, index: number, chatSessionName: string, callback: () => void): void,
+    deleteChatSession(index: number): void
 }
 
-function Sidebar({mainButton, items, children, OnSelectItem}: SideBarProps): JSX.Element {
+function Sidebar({mainButton, items, children, OnSelectItem, renameChatSession, deleteChatSession}: SideBarProps): JSX.Element {
     let justify = "";
     if (!items?.length) {
         justify = "justify-center";
@@ -38,7 +40,16 @@ function Sidebar({mainButton, items, children, OnSelectItem}: SideBarProps): JSX
             <Separator />
             <div className={`flex flex-col flex-grow items-center ${justify} text-icon-gray [&>*:not(:last-child)]:mb-[10px]`}>
                 {items?.length ? (
-                    items?.map((title, index) => <SpecialButton title={title} key={index} onClick={() => OnSelectItem(index)} />)
+                    items?.map((title, index) => (
+                        <SpecialButton
+                            title={title}
+                            key={index}
+                            index={index}
+                            onClick={OnSelectItem}
+                            onEnter={renameChatSession}
+                            onDelete={deleteChatSession}
+                        />
+                    ))
                 ) : (
                     <>
                         <Empty className="size-[30px]" />

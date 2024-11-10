@@ -4,6 +4,7 @@ import ModelSettings from "./ModelSettings";
 import StatusBar from "./StatusBar";
 import StatusBarItems from "./StatusBarItem";
 import ChatArea from "./ChatArea/ChatArea";
+import Loading from "./Loading";
 
 interface CenterProps {
     state: LlmState,
@@ -34,8 +35,6 @@ function Center({
     sendPrompt,
     saveChatHistory
 }: CenterProps): JSX.Element {
-    console.log(loaded);
-
     return (
         <div className="flex flex-col p-[8px] pt-[8px] pb-[30px] h-screen w-full">
             <StatusBar>
@@ -49,18 +48,19 @@ function Center({
                     <></>
                 )}
             </StatusBar>
-            {!loaded ? (
+            {loading ? (
+                <Loading />
+            ) : !loaded ? (
                 <ModelSettings
                     setSelectedModel={setSelectedModel}
                     loadModelAndSession={loadModelAndSession}
                     selectedModel={selectedModel}
-                    loading={loading}
                 />
             ) : (
                 <ChatArea ref={chatAreaRef} simplifiedChat={state.chatSession.simplifiedChat} />
             )}
             <BottomBar
-                disabled={loaded}
+                disabled={!loaded}
                 generatingResult={generatingResult}
                 autocompleteInputDraft={state.chatSession.draftPrompt.prompt}
                 autocompleteCompletion={state.chatSession.draftPrompt.completion}
