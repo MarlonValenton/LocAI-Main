@@ -12,10 +12,11 @@ interface SpecialButtonProps {
     index: number,
     onClick(index: number): void,
     onEnter(event: React.KeyboardEvent, index: number, chatSession: string, callback: () => void): void,
-    onDelete(index: number): void
+    onDelete(index: number): void,
+    exportItem(): void
 }
 
-function SpecialButton({title, index, onClick, onEnter, onDelete}: SpecialButtonProps): JSX.Element {
+function SpecialButton({title, index, onClick, onEnter, onDelete, exportItem}: SpecialButtonProps): JSX.Element {
     const [isEditMode, setIsEditMode] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>("");
     const ref = useRef<HTMLInputElement>(null);
@@ -48,7 +49,14 @@ function SpecialButton({title, index, onClick, onEnter, onDelete}: SpecialButton
                             <Dots className="text-icon-gray size-[20px]" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Export</DropdownMenuItem>
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    exportItem();
+                                }}
+                            >
+                                Export
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={(e) => {
                                     e.stopPropagation();

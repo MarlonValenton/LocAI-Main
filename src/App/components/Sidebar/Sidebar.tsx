@@ -6,6 +6,7 @@ import FolderPlus from "../../../icons/folder-plus.svg?react";
 import Plus from "../../../icons/plus.svg?react";
 import Empty from "../../../icons/mist-off.svg?react";
 import {Button} from "../../shadcncomponents/Button";
+import {ExportDialogType} from "../../../interfaces/dialog";
 import SpecialButton from "./SpecialButton";
 
 interface SideBarProps {
@@ -15,10 +16,20 @@ interface SideBarProps {
     mainButtonFunction(...args: any): void,
     OnSelectItem(index: number): void,
     renameItem(event: React.KeyboardEvent, index: number, chatSessionName: string, callback: () => void): void,
-    deleteItem(index: number): void
+    deleteItem(index: number): void,
+    exportItem(type: ExportDialogType, index: number): void
 }
 
-function Sidebar({mainButton, items, children, mainButtonFunction, OnSelectItem, renameItem, deleteItem}: SideBarProps): JSX.Element {
+function Sidebar({
+    mainButton,
+    items,
+    children,
+    mainButtonFunction,
+    OnSelectItem,
+    renameItem,
+    deleteItem,
+    exportItem
+}: SideBarProps): JSX.Element {
     let justify = "";
     if (!items?.length) {
         justify = "justify-center";
@@ -49,6 +60,13 @@ function Sidebar({mainButton, items, children, mainButtonFunction, OnSelectItem,
                             onClick={OnSelectItem}
                             onEnter={renameItem}
                             onDelete={deleteItem}
+                            exportItem={() => {
+                                if (mainButton.includes("chat")) {
+                                    exportItem("chat session", index);
+                                } else {
+                                    exportItem("prompt", index);
+                                }
+                            }}
                         />
                     ))
                 ) : (

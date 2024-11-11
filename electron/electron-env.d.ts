@@ -1,6 +1,7 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 /// <reference types="../src/interfaces/ChatSession" />
 /// <reference types="../src/interfaces/ChatSessionAndFilename" />
+/// <reference types="../src/interfaces/dialog" />
 
 declare namespace NodeJS {
     interface ProcessEnv {
@@ -50,6 +51,10 @@ interface Window {
         /**
          * PERMANENTLY delete a file
          */
-        deleteChatSession(filename: string): Promise<boolean>
+        deleteChatSession(filename: string): Promise<boolean>,
+        /**
+         * Export file
+         */
+        exportFile(type: ExportDialogType, item: ChatSession): Promise<void>
     }
 }

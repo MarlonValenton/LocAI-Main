@@ -1,6 +1,7 @@
 import {ipcRenderer, contextBridge} from "electron";
 import ChatSession from "../src/interfaces/ChatSession";
 import ChatSessionAndFilename from "../src/interfaces/ChatSessionAndFilename";
+import {ExportDialogType} from "../src/interfaces/dialog";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
@@ -33,5 +34,6 @@ contextBridge.exposeInMainWorld("utils", {
     saveChatSession: (filename: string, chatSession: ChatSession): Promise<void> =>
         ipcRenderer.invoke("save-chat-session", filename, chatSession),
     chatSessionExists: (filename: string): Promise<boolean> => ipcRenderer.invoke("chat-session-exists", filename),
-    deleteChatSession: (filename: string): Promise<boolean> => ipcRenderer.invoke("delete-chat-session", filename)
+    deleteChatSession: (filename: string): Promise<boolean> => ipcRenderer.invoke("delete-chat-session", filename),
+    exportFile: (type: ExportDialogType, item: ChatSession): Promise<void> => ipcRenderer.invoke("export-file", type, item)
 });

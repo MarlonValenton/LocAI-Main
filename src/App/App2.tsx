@@ -9,6 +9,7 @@ import {useExternalState} from "../hooks/useExternalState";
 import {llmState} from "../state/llmState";
 import {electronLlmRpc} from "../rpc/llmRpc";
 import ChatSessionAndFilename from "../interfaces/ChatSessionAndFilename";
+import {ExportDialogType} from "../interfaces/dialog";
 import Center from "./components/Center/Center";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SideBarButton from "./components/Sidebar/SidebarButton";
@@ -39,11 +40,9 @@ function App2(): JSX.Element {
                     console.log("Updating selected chat session");
 
                     const newChatSessionAndFilename: ChatSessionAndFilename = {
-                        filename: chatSessionAndFilename.filename,
+                        ...chatSessionAndFilename,
                         chatSession: {
-                            name: chatSessionAndFilename.chatSession.name,
-                            modelPath: chatSessionAndFilename.chatSession.modelPath,
-                            modelName: chatSessionAndFilename.chatSession.modelName,
+                            ...chatSessionAndFilename.chatSession,
                             inputTokens: state.chatSession.usedInputTokens!,
                             outputTokens: state.chatSession.usedOutputTokens!,
                             chatHistory: state.chatSession.chatHistory
@@ -272,6 +271,16 @@ function App2(): JSX.Element {
         await electronLlmRpc.unload();
     }, []);
 
+    const exportFile = useCallback(
+        async (type: ExportDialogType, index: number) => {
+            console.log("Exporting file");
+
+            await window.utils.exportFile(type, chatSessionsAndFilenames[index]!.chatSession!);
+            updateChatSessions();
+        },
+        [chatSessionsAndFilenames]
+    );
+
     !isDarkMode ? document.querySelector("html")?.classList.remove("dark") : document.querySelector("html")?.classList.add("dark");
 
     const error = state.llama.error ?? state.model.error ?? state.context.error ?? state.contextSequence.error;
@@ -290,6 +299,7 @@ function App2(): JSX.Element {
                 OnSelectItem={loadChatSession}
                 renameItem={renameChatSession}
                 deleteItem={deleteChatSession}
+                exportItem={exportFile}
             >
                 <SidebarButtonGroup>
                     <SideBarButton display="Clear Conversations" Icon={Trash} />

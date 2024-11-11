@@ -1,11 +1,11 @@
 // import fs from "node:fs/promises";
 import path from "node:path";
-// import {readFileSync} from "node:fs";
+import {readFileSync} from "node:fs";
 import {IpcMainInvokeEvent} from "electron";
 import ChatSessionFile from "../../src/interfaces/ChatSession";
 import ChatSessionAndFilename from "../../src/interfaces/ChatSessionAndFilename";
 
-// const configFile = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+const configFile = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
 
 export async function createChatSessionFile(event: IpcMainInvokeEvent, modelPath: string): Promise<ChatSessionAndFilename> {
     const chatSession: ChatSessionFile = {
@@ -24,5 +24,5 @@ export async function createChatSessionFile(event: IpcMainInvokeEvent, modelPath
 
     // await fs.writeFile(path.join(configFile.chatSessionDirectory, filename), JSON.stringify(chatSession, null, 2), "utf-8");
 
-    return {filename: filename, chatSession: chatSession};
+    return {filename: filename, path: configFile.chatSessionDirectory, chatSession: chatSession};
 }

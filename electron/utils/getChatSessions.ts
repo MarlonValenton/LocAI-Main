@@ -12,7 +12,7 @@ export function getChatSessions(): ChatSessionAndFilename[] {
         if (path.extname(file).toLowerCase() === ".json") {
             chatSessionsAndFilenames.push({
                 filename: file,
-                path: configFile.chatSession.chatSessionDirectory,
+                path: configFile.chatSessionDirectory,
                 chatSession: JSON.parse(readFileSync(path.join(chatSessionsPath, file), "utf-8"))
             });
         }
