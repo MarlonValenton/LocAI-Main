@@ -265,6 +265,13 @@ function App2(): JSX.Element {
         void electronLlmRpc.saveChatHistory();
     }, []);
 
+    const unload = useCallback(async () => {
+        console.log("Unloading state");
+        setSelectedModel("");
+        setSelectedChatSession(undefined);
+        await electronLlmRpc.unload();
+    }, []);
+
     !isDarkMode ? document.querySelector("html")?.classList.remove("dark") : document.querySelector("html")?.classList.add("dark");
 
     const error = state.llama.error ?? state.model.error ?? state.context.error ?? state.contextSequence.error;
@@ -278,10 +285,11 @@ function App2(): JSX.Element {
         <div className="flex flex-row">
             <Sidebar
                 mainButton="New chat session"
+                mainButtonFunction={unload}
                 items={chatSessionsAndFilenames.map((value) => value.chatSession.name)}
                 OnSelectItem={loadChatSession}
-                renameChatSession={renameChatSession}
-                deleteChatSession={deleteChatSession}
+                renameItem={renameChatSession}
+                deleteItem={deleteChatSession}
             >
                 <SidebarButtonGroup>
                     <SideBarButton display="Clear Conversations" Icon={Trash} />

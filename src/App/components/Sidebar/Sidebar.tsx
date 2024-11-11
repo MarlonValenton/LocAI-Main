@@ -12,12 +12,13 @@ interface SideBarProps {
     mainButton: string,
     items?: string[],
     children?: JSX.Element,
+    mainButtonFunction(...args: any): void,
     OnSelectItem(index: number): void,
-    renameChatSession(event: React.KeyboardEvent, index: number, chatSessionName: string, callback: () => void): void,
-    deleteChatSession(index: number): void
+    renameItem(event: React.KeyboardEvent, index: number, chatSessionName: string, callback: () => void): void,
+    deleteItem(index: number): void
 }
 
-function Sidebar({mainButton, items, children, OnSelectItem, renameChatSession, deleteChatSession}: SideBarProps): JSX.Element {
+function Sidebar({mainButton, items, children, mainButtonFunction, OnSelectItem, renameItem, deleteItem}: SideBarProps): JSX.Element {
     let justify = "";
     if (!items?.length) {
         justify = "justify-center";
@@ -27,7 +28,7 @@ function Sidebar({mainButton, items, children, OnSelectItem, renameChatSession, 
         <div className="flex flex-col w-[260px] p-[8px] [&>*:not(:last-child)]:mb-[12px] bg-foreground h-screen flex-none">
             <div className="flex-none">
                 <div className="flex flex-row mb-[12px]">
-                    <Button className="w-full mr-[13px]">
+                    <Button className="w-full mr-[13px]" onClick={() => mainButtonFunction()}>
                         <Plus className="size-icon mr-[5px]" />
                         <p>{mainButton}</p>
                     </Button>
@@ -46,8 +47,8 @@ function Sidebar({mainButton, items, children, OnSelectItem, renameChatSession, 
                             key={index}
                             index={index}
                             onClick={OnSelectItem}
-                            onEnter={renameChatSession}
-                            onDelete={deleteChatSession}
+                            onEnter={renameItem}
+                            onDelete={deleteItem}
                         />
                     ))
                 ) : (

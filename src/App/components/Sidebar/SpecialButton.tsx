@@ -62,7 +62,7 @@ function SpecialButton({title, index, onClick, onEnter, onDelete}: SpecialButton
                                     e.stopPropagation();
                                     onDelete(index);
                                 }}
-                                className="text-negative font-semibold focus:bg-negative/50 focus:text-negative"
+                                className="text-negative font-semibold focus:bg-negative/50 dark:focus:bg-negative/30 focus:text-negative"
                             >
                                 Delete
                             </DropdownMenuItem>
