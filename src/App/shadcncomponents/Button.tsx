@@ -13,8 +13,7 @@ const buttonVariants = cva(
                 demo_hover: "bg-primary-hover text-cblack",
                 demo_pressed: "bg-primary-pressed text-cblack",
 
-                outline:
-          "border-[2px] border-primary bg-transparent text-primary hover:bg-primary-hover/10 active:bg-primary-pressed/20",
+                outline: "border-[2px] border-primary bg-transparent text-primary hover:bg-primary-hover/10 active:bg-primary-pressed/20",
                 demo_outline_hover: "border-[2px] border-primary bg-primary-hover/10 text-primary",
                 demo_outline_pressed: "border-[2px] border-primary bg-primary-pressed/20 text-primary",
 
@@ -23,30 +22,25 @@ const buttonVariants = cva(
                 demo_positive_pressed: "bg-positive-pressed text-white",
 
                 positive_outline:
-          "border-[2px] border-positive bg-transparent text-positive hover:bg-positive-hover/10 active:bg-positive-pressed/20",
-                demo_positive_outline_hover:
-          "border-[2px] border-positive text-positive bg-positive-hover/10",
-                demo_positive_outline_pressed:
-          "border-[2px] border-positive bg-transparent text-positive bg-positive-pressed/20",
+                    "border-[2px] border-positive bg-transparent text-positive hover:bg-positive-hover/10 active:bg-positive-pressed/20",
+                demo_positive_outline_hover: "border-[2px] border-positive text-positive bg-positive-hover/10",
+                demo_positive_outline_pressed: "border-[2px] border-positive bg-transparent text-positive bg-positive-pressed/20",
 
                 negative: "bg-negative text-white hover:bg-negative-hover active:bg-negative-pressed",
                 demo_negative_hover: "bg-negative-hover text-white",
                 demo_negative_pressed: "bg-negative-pressed text-white",
 
                 negative_outline:
-          "border-[2px] bg-transparent border-negative text-negative hover:bg-negative-hover/10 active:bg-negative-pressed/20",
-                demo_negative_outline_hover:
-          "border-[2px] border-negative bg-negative-hover/10 text-negative",
-                demo_negative_outline_pressed:
-          "border-[2px] border-negative bg-negative-pressed/20 text-negative",
+                    "border-[2px] bg-transparent border-negative text-negative hover:bg-negative-hover/10 active:bg-negative-pressed/20",
+                demo_negative_outline_hover: "border-[2px] border-negative bg-negative-hover/10 text-negative",
+                demo_negative_outline_pressed: "border-[2px] border-negative bg-negative-pressed/20 text-negative",
 
                 transparent:
-          "bg-transparent justify-start hover:bg-black/10 active:bg-black/20 dark:hover:bg-white/10 dark:active:bg-white/20",
+                    "bg-transparent justify-start hover:bg-black/10 active:bg-black/20 dark:hover:bg-white/10 dark:active:bg-white/20",
                 demo_transparent_hover: "bg-black/5 dark:bg-white/10 justify-start",
                 demo_transparent_pressed: "bg-transprent dark:bg-white/20 justify-start",
 
-                transparent_full:
-          "bg-transparent justify-center hover:bg-transparent active:bg-transparent",
+                transparent_full: "bg-transparent justify-center hover:bg-transparent hover:underline active:bg-transparent",
 
                 // transparent: 'bg-transparent justify-start hover:bg-white/10 active:bg-white/20',
                 // demo_transparent_hover: 'bg-white/10 justify-start',
@@ -74,20 +68,14 @@ const buttonVariants = cva(
     }
 );
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+    asChild?: boolean
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({className, variant, size, asChild = false, ...props}, ref) => {
-        const Comp = asChild ? Slot : "button";
-        return (
-            <Comp className={cn(buttonVariants({variant, size, className}))} ref={ref} {...props} />
-        );
-    }
-);
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({className, variant, size, asChild = false, ...props}, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return <Comp className={cn(buttonVariants({variant, size, className}))} ref={ref} {...props} />;
+});
 Button.displayName = "Button";
 
 export {Button, buttonVariants};

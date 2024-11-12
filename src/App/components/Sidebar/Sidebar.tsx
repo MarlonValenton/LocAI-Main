@@ -7,11 +7,12 @@ import Plus from "../../../icons/plus.svg?react";
 import Empty from "../../../icons/mist-off.svg?react";
 import {Button} from "../../shadcncomponents/Button";
 import {ExportDialogType} from "../../../interfaces/dialog";
+import ChatSessionAndFilename from "../../../interfaces/ChatSessionAndFilename";
 import SpecialButton from "./SpecialButton";
 
 interface SideBarProps {
     mainButton: string,
-    items?: string[],
+    items?: ChatSessionAndFilename[],
     children?: JSX.Element,
     mainButtonFunction(...args: any): void,
     OnSelectItem(index: number): void,
@@ -52,9 +53,9 @@ function Sidebar({
             <Separator />
             <div className={`flex flex-col flex-grow items-center ${justify} text-icon-gray [&>*:not(:last-child)]:mb-[10px]`}>
                 {items?.length ? (
-                    items?.map((title, index) => (
+                    items?.map((item, index) => (
                         <SpecialButton
-                            title={title}
+                            item={item}
                             key={index}
                             index={index}
                             onClick={OnSelectItem}

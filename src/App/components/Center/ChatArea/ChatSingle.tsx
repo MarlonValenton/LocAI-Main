@@ -3,9 +3,11 @@
 import Markdown from "react-markdown";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import {nightOwl, defaultStyle} from "react-syntax-highlighter/dist/esm/styles/hljs";
+import {useState} from "react";
 import Robot from "../../../../icons/robot.svg?react";
 import User from "../../../../icons/user.svg?react";
 import Copy from "../../../../icons/copy.svg?react";
+import Check from "../../../../icons/check.svg?react";
 
 type ChatSingleProps = {
     type: string,
@@ -14,6 +16,7 @@ type ChatSingleProps = {
 };
 
 function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
+    const [isCopyClicked, setIsCopyClicked] = useState<boolean>(false);
     const isDark = document.querySelector("html")?.classList.contains("dark");
     let backgroundColor;
 
@@ -49,10 +52,22 @@ function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
                                         }}
                                     />
                                     <button
-                                        className="absolute bottom-0 right-0 z-1 text-icon-gray"
-                                        onClick={() => navigator.clipboard.writeText(String(children).replace(/\n$/, ""))}
+                                        className="absolute top-0 right-0 z-1 text-icon-gray"
+                                        onClick={() => {
+                                            if (!isCopyClicked) {
+                                                setIsCopyClicked(true);
+                                                setTimeout(() => {
+                                                    setIsCopyClicked(false);
+                                                }, 2000);
+                                                navigator.clipboard.writeText(String(children).replace(/\n$/, ""));
+                                            }
+                                        }}
                                     >
-                                        <Copy className="size-[20px]" />
+                                        {isCopyClicked ? (
+                                            <Check className="size-[25px] p-[5px] rounded-[5px] hover:bg-foreground dark:hover:bg-background-light" />
+                                        ) : (
+                                            <Copy className="size-[25px] p-[5px] rounded-[5px] hover:bg-foreground dark:hover:bg-background-light" />
+                                        )}
                                     </button>
                                 </div>
                             ) : (

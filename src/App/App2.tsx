@@ -295,7 +295,7 @@ function App2(): JSX.Element {
             <Sidebar
                 mainButton="New chat session"
                 mainButtonFunction={unload}
-                items={chatSessionsAndFilenames.map((value) => value.chatSession.name)}
+                items={chatSessionsAndFilenames}
                 OnSelectItem={loadChatSession}
                 renameItem={renameChatSession}
                 deleteItem={deleteChatSession}

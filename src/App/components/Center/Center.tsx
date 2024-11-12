@@ -38,7 +38,7 @@ function Center({
     return (
         <div className="flex flex-col p-[8px] pt-[8px] pb-[30px] h-screen w-full">
             <StatusBar>
-                {selectedModel !== "" ? (
+                {selectedModel !== "" && !loading ? (
                     <>
                         <StatusBarItems display={selectedModel.split("\\").pop()} />{" "}
                         <StatusBarItems display={`Input Tokens: ${state.chatSession.usedInputTokens}/1000`} separator={false} />
