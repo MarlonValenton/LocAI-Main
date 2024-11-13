@@ -28,11 +28,15 @@ export function DeleteDialog({ChatSessionAndFilename, children, onDelete}: Delet
                             outputTokens={ChatSessionAndFilename.chatSession.outputTokens}
                         />
                         <div>
-                            {ChatSessionAndFilename.chatSession.chatHistory!.map((item, index) => (
-                                <ChatSingle index={index} type={item.type}>
-                                    {item.type === "model" ? item.response[0]!.toString() : item.text.toString()}
-                                </ChatSingle>
-                            ))}
+                            {ChatSessionAndFilename.chatSession.chatHistory!.map((item, index) => {
+                                if (item.type !== "system") {
+                                    return (
+                                        <ChatSingle index={index + 1} type={item.type}>
+                                            {item.type === "model" ? item.response[0]!.toString() : item.text.toString()}
+                                        </ChatSingle>
+                                    );
+                                } else return <></>;
+                            })}
                         </div>
                     </div>
                     <DialogFooter className="border-border-gray border-t-[1px] px-[15px] py-[10px]">
@@ -60,7 +64,7 @@ interface ExtraInformationDialogProps {
 function ExtraInformationDialog({filename, modelName, inputTokens, outputTokens}: ExtraInformationDialogProps) {
     return (
         <div className="w-[40%] absolute top-[0%] left-[-45%] bg-background rounded-[10px] h-fit">
-            <div className="font-semibold text-lg border-b-[1px] border-b-border-gray px-[15px] pt-[15px] pb-[10px]">File Information:</div>
+            <div className="font-semibold text-lg border-b-[1px] border-b-border-gray px-[15px] pt-[15px] pb-[10px]">File Information</div>
             <div className="flex flex-col gap-[10px] px-[15px] pt-[10px] pb-[15px] break-words">
                 {[
                     ["Filename:", filename],

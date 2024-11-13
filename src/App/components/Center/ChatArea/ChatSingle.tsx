@@ -8,6 +8,7 @@ import Robot from "../../../../icons/robot.svg?react";
 import User from "../../../../icons/user.svg?react";
 import Copy from "../../../../icons/copy.svg?react";
 import Check from "../../../../icons/check.svg?react";
+import System from "../../../../icons/device-desktop.svg?react";
 
 type ChatSingleProps = {
     type: string,
@@ -18,6 +19,7 @@ type ChatSingleProps = {
 function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
     const [isCopyClicked, setIsCopyClicked] = useState<boolean>(false);
     const isDark = document.querySelector("html")?.classList.contains("dark");
+
     let backgroundColor;
 
     if (index % 2 === 1) {
@@ -30,7 +32,13 @@ function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
         <div className={`w-full bg-foreground py-[20px] px-[10%] bg-${backgroundColor}`}>
             <div className="flex w-full">
                 <div className="text-primary h-full mr-[30px]">
-                    {type === "user" ? <User className="size-[30px]" /> : <Robot className="size-[30px]" />}
+                    {type === "user" ? (
+                        <User className="size-[30px]" />
+                    ) : type === "system" ? (
+                        <System className="size-[30px]" />
+                    ) : (
+                        <Robot className="size-[30px]" />
+                    )}
                 </div>
                 <Markdown
                     className="prose dark:prose-invert max-w-full"
