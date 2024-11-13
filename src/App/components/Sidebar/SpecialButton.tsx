@@ -47,7 +47,7 @@ function SpecialButton({item, index, onClick, onEnter, onDelete, exportItem}: Sp
             )}
             {!isEditMode ? (
                 <div className="flex flex-1 justify-end items-center">
-                    <DeleteDialog onDelete={() => onDelete(index)} chatHistory={item.chatSession.chatHistory!}>
+                    <DeleteDialog onDelete={() => onDelete(index)} ChatSessionAndFilename={item}>
                         <DropdownMenu>
                             <DropdownMenuTrigger className="flex items-center">
                                 <Dots className="text-icon-gray size-[20px]" />
