@@ -173,6 +173,7 @@ function App2(): JSX.Element {
 
                 const newChatSessionsAndFilenames = chatSessionsAndFilenames.filter((chatSession, i) => i !== index);
                 setChatSessionsAndFilenames(newChatSessionsAndFilenames);
+                unload();
             } catch (err) {
                 updateChatSessions();
             }
@@ -219,6 +220,7 @@ function App2(): JSX.Element {
             console.log("Added newChatSession to existing chatSessions");
 
             await electronLlmRpc.loadModelAndSession(selectedModel);
+            await saveChatSession(newChatSessionAndFilename);
         }
     }, [selectedModel]);
 

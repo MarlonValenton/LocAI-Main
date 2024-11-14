@@ -78,7 +78,7 @@ export type LlmState = {
 };
 
 type SimplifiedChatItem = {
-    type: "user" | "model",
+    type: "user" | "model" | "system",
     message: string
 };
 
@@ -299,8 +299,8 @@ export const llmFunctions = {
                             generatingResult: false,
                             simplifiedChat: [],
                             draftPrompt: llmState.state.chatSession.draftPrompt,
-                            usedInputTokens: contextSequence.tokenMeter.usedInputTokens,
-                            usedOutputTokens: contextSequence.tokenMeter.usedOutputTokens
+                            usedInputTokens: 0,
+                            usedOutputTokens: 0
                         }
                     };
 
@@ -320,8 +320,8 @@ export const llmFunctions = {
                         chatSession: {
                             ...llmState.state.chatSession,
                             loaded: true,
-                            usedInputTokens: contextSequence.tokenMeter.usedInputTokens,
-                            usedOutputTokens: contextSequence.tokenMeter.usedOutputTokens
+                            usedInputTokens: 0,
+                            usedOutputTokens: 0
                         }
                     };
                 } catch (err) {
@@ -333,8 +333,8 @@ export const llmFunctions = {
                             generatingResult: false,
                             simplifiedChat: [],
                             draftPrompt: llmState.state.chatSession.draftPrompt,
-                            usedInputTokens: contextSequence.tokenMeter.usedInputTokens,
-                            usedOutputTokens: contextSequence.tokenMeter.usedOutputTokens
+                            usedInputTokens: 0,
+                            usedOutputTokens: 0
                         }
                     };
                 }
@@ -660,7 +660,7 @@ function getSimplifiedChatHistory(generatingResult: boolean, currentPrompt?: str
     if (chatSession == null) return [];
 
     const chatHistory: SimplifiedChatItem[] = chatSession.getChatHistory().flatMap((item): SimplifiedChatItem[] => {
-        if (item.type === "system") return [];
+        if (item.type === "system") return [{type: "system", message: item.text.toString()}];
         else if (item.type === "user") return [{type: "user", message: item.text}];
         else if (item.type === "model")
             return [

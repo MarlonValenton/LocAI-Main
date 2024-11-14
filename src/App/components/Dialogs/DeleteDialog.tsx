@@ -2,9 +2,9 @@ import {DialogClose} from "@radix-ui/react-dialog";
 import {useState} from "react";
 import {Button} from "../../shadcncomponents//Button";
 import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "../../shadcncomponents/dialog";
-import ChatSingle from "../Center/ChatArea/ChatSingle";
 import ChatSessionAndFilename from "../../../interfaces/ChatSessionAndFilename";
 import {Switch} from "../../shadcncomponents/switch";
+import ChatArea from "../Center/ChatArea/ChatArea";
 
 interface DeleteDialogProps {
     ChatSessionAndFilename: ChatSessionAndFilename,
@@ -31,17 +31,7 @@ export function DeleteDialog({ChatSessionAndFilename, children, onDelete}: Delet
                             inputTokens={ChatSessionAndFilename.chatSession.inputTokens}
                             outputTokens={ChatSessionAndFilename.chatSession.outputTokens}
                         />
-                        <div>
-                            {ChatSessionAndFilename.chatSession.chatHistory!.map((item, index) => {
-                                if ((item.type !== "system" && !isShowSystemPrompt) || isShowSystemPrompt) {
-                                    return (
-                                        <ChatSingle index={index + 1} type={item.type}>
-                                            {item.type === "model" ? item.response[0]!.toString() : item.text.toString()}
-                                        </ChatSingle>
-                                    );
-                                } else return <></>;
-                            })}
-                        </div>
+                        <ChatArea chatHistory={ChatSessionAndFilename.chatSession.chatHistory} isShowSystemPrompt={isShowSystemPrompt} />
                     </div>
                     <DialogFooter className="border-border-gray border-t-[1px] px-[15px] py-[10px]">
                         <div className="flex gap-[10px] flex-grow items-center">

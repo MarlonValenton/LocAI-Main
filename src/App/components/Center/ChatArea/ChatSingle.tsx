@@ -22,7 +22,7 @@ function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
 
     let backgroundColor;
 
-    if (index % 2 === 1) {
+    if (index % 2 === 0) {
         backgroundColor = "foreground";
     } else {
         backgroundColor = "transparent";
