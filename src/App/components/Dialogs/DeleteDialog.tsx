@@ -1,8 +1,10 @@
 import {DialogClose} from "@radix-ui/react-dialog";
+import {useState} from "react";
 import {Button} from "../../shadcncomponents//Button";
 import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "../../shadcncomponents/dialog";
 import ChatSingle from "../Center/ChatArea/ChatSingle";
 import ChatSessionAndFilename from "../../../interfaces/ChatSessionAndFilename";
+import {Switch} from "../../shadcncomponents/switch";
 
 interface DeleteDialogProps {
     ChatSessionAndFilename: ChatSessionAndFilename,
@@ -11,6 +13,8 @@ interface DeleteDialogProps {
 }
 
 export function DeleteDialog({ChatSessionAndFilename, children, onDelete}: DeleteDialogProps) {
+    const [isShowSystemPrompt, setIsShowSystemPrompt] = useState<boolean>(false);
+
     return (
         <div onClick={(e) => e.stopPropagation()}>
             <Dialog>
@@ -29,7 +33,7 @@ export function DeleteDialog({ChatSessionAndFilename, children, onDelete}: Delet
                         />
                         <div>
                             {ChatSessionAndFilename.chatSession.chatHistory!.map((item, index) => {
-                                if (item.type !== "system") {
+                                if ((item.type !== "system" && !isShowSystemPrompt) || isShowSystemPrompt) {
                                     return (
                                         <ChatSingle index={index + 1} type={item.type}>
                                             {item.type === "model" ? item.response[0]!.toString() : item.text.toString()}
@@ -40,6 +44,10 @@ export function DeleteDialog({ChatSessionAndFilename, children, onDelete}: Delet
                         </div>
                     </div>
                     <DialogFooter className="border-border-gray border-t-[1px] px-[15px] py-[10px]">
+                        <div className="flex gap-[10px] flex-grow items-center">
+                            <Switch checked={isShowSystemPrompt} onCheckedChange={() => setIsShowSystemPrompt((value) => !value)} />
+                            System prompt visibility
+                        </div>
                         <DialogClose asChild>
                             <Button className="w-[100px]" variant="transparent_full">
                                 Cancel
