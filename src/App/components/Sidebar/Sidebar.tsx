@@ -1,5 +1,6 @@
 /// <reference types="vite-plugin-svgr/client" />
 
+import {useEffect, useState} from "react";
 import {Input} from "../../shadcncomponents/Input";
 import {Separator} from "../../shadcncomponents/Separator";
 import FolderPlus from "../../../icons/folder-plus.svg?react";
@@ -31,10 +32,20 @@ function Sidebar({
     deleteItem,
     exportItem
 }: SideBarProps): JSX.Element {
+    const [inputValue, setInputValue] = useState<string>("");
+    const [filteredItems, setFilteredItems] = useState<ChatSessionAndFilename[]>();
+
     let justify = "";
-    if (!items?.length) {
+    if (!filteredItems?.length) {
         justify = "justify-center";
     }
+
+    useEffect(() => {
+        if (inputValue !== "") {
+            const newItems = items?.filter((item) => item.chatSession.name.toLowerCase().includes(inputValue.toLowerCase()));
+            setFilteredItems(newItems);
+        } else setFilteredItems(items);
+    }, [inputValue, items]);
 
     return (
         <div className="flex flex-col w-[260px] p-[8px] [&>*:not(:last-child)]:mb-[12px] bg-foreground h-screen flex-none">
@@ -48,12 +59,12 @@ function Sidebar({
                         <FolderPlus className="size-icon" />
                     </Button>
                 </div>
-                <Input placeholder="Search..." />
+                <Input placeholder="Search..." onChange={(e) => setInputValue(e.target.value)} />
             </div>
             <Separator />
             <div className={`flex flex-col flex-grow items-center ${justify} text-icon-gray [&>*:not(:last-child)]:mb-[10px]`}>
-                {items?.length ? (
-                    items?.map((item, index) => (
+                {filteredItems?.length ? (
+                    filteredItems?.map((item, index) => (
                         <SpecialButton
                             item={item}
                             key={index}
