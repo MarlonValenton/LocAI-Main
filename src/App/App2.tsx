@@ -82,8 +82,6 @@ function App2(): JSX.Element {
                 const chatSession = chatSessionsAndFilenames[index]?.chatSession;
                 setSelectedChatSession(chatSession);
                 console.log("Selected chat session set");
-                setSelectedModel(chatSession!.modelPath);
-                console.log("Selected model set");
 
                 console.log(`${selectedChatSession?.modelName} === ${chatSession?.modelName}`);
 
@@ -108,6 +106,9 @@ function App2(): JSX.Element {
                     console.log("Loading Chat History");
                     await electronLlmRpc.loadChatHistory(chatSession!.chatHistory!, chatSession!.inputTokens, chatSession!.outputTokens);
                 }
+
+                setSelectedModel(chatSession!.modelPath);
+                console.log("Selected model set");
             } else console.log("There are no chat sessions available");
             updateChatSessions();
         },
