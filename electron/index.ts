@@ -43,6 +43,7 @@ function createWindow() {
         minHeight: 720,
         autoHideMenuBar: true
     });
+    win.setAspectRatio(16 / 9);
     registerLlmRpc(win);
 
     // open external links in the default browser
