@@ -21,10 +21,10 @@ function App2(): JSX.Element {
     const [chatSessionsAndFilenames, setChatSessionsAndFilenames] = useState<ChatSessionAndFilename[]>([]);
     const [selectedChatSession, setSelectedChatSession] = useState<ChatSession>();
     const [selectedModel, setSelectedModel] = useState("");
+    const [loadMessage, setloadMessage] = useState<string>();
     const state = useExternalState(llmState);
     const {generatingResult} = state.chatSession;
     const chatAreaRef = useRef<HTMLDivElement>(null);
-    // const [loaded, setLoaded] = useState<boolean>(false);
 
     useEffect(() => {
         console.log("Getting chat sessions from file system");
@@ -77,6 +77,8 @@ function App2(): JSX.Element {
     const loadChatSession = useCallback(
         async (index: number) => {
             console.log("Loading chat session");
+            setloadMessage("Loading chat session");
+            await unload();
 
             if (chatSessionsAndFilenames) {
                 const chatSession = chatSessionsAndFilenames[index]?.chatSession;
@@ -92,17 +94,22 @@ function App2(): JSX.Element {
                     // await electronLlmRpc.loadModel(chatSession!.modelPath);
                     console.log("Creating Context");
                     await electronLlmRpc.createContext();
-                    console.log("Creating Context Sequence");
+
+                    console.log("Creating Context");
                     await electronLlmRpc.createContextSequence();
+
                     console.log("Loading Chat History");
                     await electronLlmRpc.loadChatHistory(chatSession!.chatHistory!, chatSession!.inputTokens, chatSession!.outputTokens);
                 } else {
                     console.log("Loading Model");
                     await electronLlmRpc.loadModel(chatSession!.modelPath);
+
                     console.log("Creating Context");
                     await electronLlmRpc.createContext();
+
                     console.log("Creating Context Sequence");
                     await electronLlmRpc.createContextSequence();
+
                     console.log("Loading Chat History");
                     await electronLlmRpc.loadChatHistory(chatSession!.chatHistory!, chatSession!.inputTokens, chatSession!.outputTokens);
                 }
@@ -207,6 +214,7 @@ function App2(): JSX.Element {
     const loadModelAndSession = useCallback(async () => {
         if (selectedModel) {
             console.log(`Loading ${selectedModel}`);
+            setloadMessage("Loading model");
 
             const updatedChatSessionsAndFilenames = await getChatSessions();
             console.log("Updating chatSessionsAndFilenames first");
@@ -269,8 +277,8 @@ function App2(): JSX.Element {
 
     const unload = useCallback(async () => {
         console.log("Unloading state");
-        setSelectedModel("");
-        setSelectedChatSession(undefined);
+        // setSelectedModel("");
+        // setSelectedChatSession(undefined);
         await electronLlmRpc.unload();
     }, []);
 
@@ -318,6 +326,8 @@ function App2(): JSX.Element {
                 chatAreaRef={chatAreaRef}
                 generatingResult={generatingResult}
                 loading={loading}
+                error={error}
+                loadMessage={loadMessage}
                 setSelectedModel={setSelectedModel}
                 loadModelAndSession={loadModelAndSession}
                 stopActivePrompt={stopActivePrompt}

@@ -11,7 +11,10 @@ import "./input.css";
 // Prompt
 // Status bar items
 // model settings
-// side bar search
+// color labels for items?
+// special button extra info?
+// advanced sidebar search
+// preserve window size
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>

@@ -216,7 +216,7 @@ export const llmFunctions = {
                     context: {loaded: false}
                 };
 
-                context = await model.createContext({contextSize: 8196});
+                context = await model.createContext({contextSize: 2048});
                 llmState.state = {
                     ...llmState.state,
                     context: {loaded: true}
@@ -229,12 +229,12 @@ export const llmFunctions = {
                     };
                 });
             } catch (err) {
-                console.error("Failed to create context", err);
+                console.error("Failed to create context (Consider using a smaller context size)", err);
                 llmState.state = {
                     ...llmState.state,
                     context: {
                         loaded: false,
-                        error: String(err)
+                        error: String(err + " (consider using a smaller context size)")
                     }
                 };
             }
@@ -575,83 +575,91 @@ export const llmFunctions = {
     },
     async unload() {
         await withLock(llmFunctions, "unload", async () => {
-            llmState.state.selectedModelFilePath = undefined;
+            // llmState.state.selectedModelFilePath = undefined;
 
-            console.log("Disposing Llama");
-            if (llama != null) {
-                try {
-                    await llama.dispose();
-                    llama = null;
-                } catch (err) {
-                    console.error("Failed to dispose llama", err);
-                }
-            }
             llmState.state = {
                 ...llmState.state,
-                llama: {loaded: false}
+                llama: {...llmState.state.llama, error: undefined},
+                model: {...llmState.state.model, error: undefined},
+                context: {...llmState.state.context, error: undefined},
+                contextSequence: {...llmState.state.contextSequence, error: undefined}
             };
 
-            console.log("Disposing model");
-            if (model != null) {
-                try {
-                    await model.dispose();
-                    model = null;
-                } catch (err) {
-                    console.error("Failed to dispose model", err);
-                }
-            }
-            llmState.state = {
-                ...llmState.state,
-                model: {
-                    loaded: false,
-                    loadProgress: 0
-                }
-            };
+            // console.log("Disposing Llama");
+            // if (llama != null) {
+            //     try {
+            //         await llama.dispose();
+            //         llama = null;
+            //     } catch (err) {
+            //         console.error("Failed to dispose llama", err);
+            //     }
+            // }
+            // llmState.state = {
+            //     ...llmState.state,
+            //     llama: {loaded: false}
+            // };
 
-            console.log("Disposing context");
-            if (context != null) {
-                try {
-                    await context.dispose();
-                    context = null;
-                } catch (err) {
-                    console.error("Failed to dispose context", err);
-                }
-            }
-            llmState.state = {
-                ...llmState.state,
-                context: {loaded: false}
-            };
+            // console.log("Disposing model");
+            // if (model != null) {
+            //     try {
+            //         await model.dispose();
+            //         model = null;
+            //     } catch (err) {
+            //         console.error("Failed to dispose model", err);
+            //     }
+            // }
+            // llmState.state = {
+            //     ...llmState.state,
+            //     model: {
+            //         loaded: false,
+            //         loadProgress: 0
+            //     }
+            // };
 
-            console.log("Disposing contextSequence");
-            llmState.state = {
-                ...llmState.state,
-                contextSequence: {loaded: false}
-            };
+            // console.log("Disposing context");
+            // if (context != null) {
+            //     try {
+            //         await context.dispose();
+            //         context = null;
+            //     } catch (err) {
+            //         console.error("Failed to dispose context", err);
+            //     }
+            // }
+            // llmState.state = {
+            //     ...llmState.state,
+            //     context: {loaded: false}
+            // };
 
-            console.log("Disposing chatSession");
-            if (chatSession != null) {
-                try {
-                    chatSession.dispose();
-                    chatSession = null;
-                    chatSessionCompletionEngine = null;
-                } catch (err) {
-                    console.error("Failed to dispose chat session", err);
-                }
-            }
-            llmState.state = {
-                ...llmState.state,
-                chatSession: {
-                    loaded: false,
-                    generatingResult: false,
-                    simplifiedChat: [],
-                    draftPrompt: {
-                        prompt: "",
-                        completion: ""
-                    },
-                    usedInputTokens: 0,
-                    usedOutputTokens: 0
-                }
-            };
+            // console.log("Disposing contextSequence");
+            // llmState.state = {
+            //     ...llmState.state,
+            //     contextSequence: {loaded: false}
+            // };
+
+            // console.log("Disposing chatSession");
+            // if (chatSession != null) {
+            //     try {
+            //         chatSession.dispose();
+            //         chatSession = null;
+            //         chatSessionCompletionEngine = null;
+            //     } catch (err) {
+            //         console.error("Failed to dispose chat session", err);
+            //     }
+            // }
+            // llmState.state = {
+            //     ...llmState.state,
+            //     chatSession: {
+            //         loaded: false,
+            //         generatingResult: false,
+            //         simplifiedChat: [],
+            //         draftPrompt: {
+            //             prompt: "",
+            //             completion: ""
+            //         },
+            //         usedInputTokens: 0,
+            //         usedOutputTokens: 0
+            //     }
+            // };
         });
     }
 } as const;

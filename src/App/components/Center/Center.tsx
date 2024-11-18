@@ -1,9 +1,10 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {useCallback, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {LlmState} from "../../../../electron/state/llmState";
 import Plus from "../../../icons/plus.svg?react";
 import FileExport from "../../../icons/file-export.svg?react";
+import Error from "../../../icons/exclamation-circle.svg?react";
 import {Switch} from "../../shadcncomponents/switch";
 import {BottomBar, BottomBarInput, QuickSettings, QuickSettingsItem} from "./BottomBar";
 import ModelSettings from "./ModelSettings";
@@ -18,6 +19,8 @@ interface CenterProps {
     chatAreaRef: React.RefObject<HTMLDivElement>,
     generatingResult: boolean,
     loading: boolean,
+    error?: string,
+    loadMessage?: string,
     setSelectedModel: React.Dispatch<React.SetStateAction<string>>,
     loadModelAndSession(): Promise<void>,
     stopActivePrompt(): void,
@@ -33,6 +36,8 @@ function Center({
     chatAreaRef,
     generatingResult,
     loading,
+    error,
+    loadMessage,
     setSelectedModel,
     loadModelAndSession,
     stopActivePrompt,
@@ -42,9 +47,26 @@ function Center({
 }: CenterProps): JSX.Element {
     const [isShowSystemPrompt, setIsShowSystemPrompt] = useState<boolean>(false);
     const [inputText, setInputText] = useState<string>("");
+    const [isSystemPrompt, setisSystemPrompt] = useState<boolean>(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const autocompleteRef = useRef<HTMLDivElement>(null);
     const autocompleteCurrentTextRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (state.chatSession.simplifiedChat.length) {
+            state.chatSession.simplifiedChat.some((item) => {
+                if (item.type === "system") {
+                    setisSystemPrompt(true);
+                    console.log("true");
+                    return true;
+                } else {
+                    setisSystemPrompt(false);
+                    console.log("false");
+                    return false;
+                }
+            });
+        } else setisSystemPrompt(false);
+    }, [loading, error]);
 
     const autocompleteText = useMemo(() => {
         const fullText = (state.chatSession.draftPrompt.prompt ?? "") + (state.chatSession.draftPrompt.completion ?? "");
@@ -125,8 +147,13 @@ function Center({
                     <></>
                 )}
             </StatusBar>
-            {loading ? (
-                <Loading />
+            {error ? (
+                <div className="flex gap-[10px] w-full h-full items-center justify-center text-negative">
+                    <Error />
+                    {error}
+                </div>
+            ) : loading ? (
+                <Loading progress={state.model.loadProgress}>{loadMessage}</Loading>
             ) : !loaded ? (
                 <ModelSettings
                     setSelectedModel={setSelectedModel}
@@ -149,7 +176,11 @@ function Center({
                     submitPrompt={submitPrompt}
                 />
                 <QuickSettings>
-                    <Switch checked={isShowSystemPrompt} onCheckedChange={() => setIsShowSystemPrompt((value) => !value)} />
+                    <Switch
+                        disabled={!isSystemPrompt}
+                        checked={isShowSystemPrompt}
+                        onCheckedChange={() => setIsShowSystemPrompt((value) => !value)}
+                    />
                     <QuickSettingsItem icon={FileExport} onClick={saveChatHistory} />
                     <QuickSettingsItem icon={Plus} />
                     <QuickSettingsItem icon={Plus} />
