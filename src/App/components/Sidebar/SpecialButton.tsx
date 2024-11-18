@@ -29,7 +29,7 @@ function SpecialButton({item, index, onClick, onEnter, onDelete, exportItem}: Sp
         <div
             onClick={() => onClick(index)}
             onKeyDownCapture={(e) => onEnter(e, index, inputValue, () => setIsEditMode(false))}
-            className="flex items-center h-[40px] w-full px-[10px] rounded-[5px] text-cblack dark:text-cwhite bg-foreground-dark
+            className="flex flex-none items-center h-[40px] w-full px-[10px] rounded-[5px] text-cblack dark:text-cwhite bg-foreground-dark
       dark:bg-background-light text-[15px] select-none hover:bg-foreground-dark/60 hover:dark:bg-white/20
       active:bg-foreground-dark/40 active:dark:bg-white/30 cursor-pointer"
         >

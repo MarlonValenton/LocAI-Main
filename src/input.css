@@ -140,7 +140,7 @@
   }
 
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
   }
 
   ::-webkit-scrollbar-track {
@@ -148,8 +148,11 @@
   }
 
   ::-webkit-scrollbar-thumb {
-  background: hsl(var(--foreground-dark));
-}
+    background: hsl(var(--foreground-dark));
+    border: 3px solid rgba(255, 0, 0, 0);
+    background-clip: padding-box;
+    border-radius: 10px;
+  }
 
   body {
     @apply dark:bg-background text-cblack dark:text-cwhite;

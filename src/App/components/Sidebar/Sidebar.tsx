@@ -62,7 +62,9 @@ function Sidebar({
                 <Input placeholder="Search..." onChange={(e) => setInputValue(e.target.value)} />
             </div>
             <Separator />
-            <div className={`flex flex-col flex-grow items-center ${justify} text-icon-gray [&>*:not(:last-child)]:mb-[10px]`}>
+            <div
+                className={`flex flex-col flex-grow items-center ${justify} text-icon-gray [&>*:not(:last-child)]:mb-[10px] overflow-auto`}
+            >
                 {filteredItems?.length ? (
                     filteredItems?.map((item, index) => (
                         <SpecialButton
