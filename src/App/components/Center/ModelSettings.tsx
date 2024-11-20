@@ -32,22 +32,20 @@ function ModelSettings({setSelectedModel, selectedModel, loadModelAndSession}: M
                     label="Model"
                     selectOptions={{selectText: "Select a model"}}
                     onValueChange={setSelectedModel}
-                    items={modelFiles.map((item) => item.split("\\").pop())}
+                    items={modelFiles.map((item) => ({item: item.split("\\").pop()!, value: item}))}
                 />
-                <LabelAndInput
-                    type="textarea"
-                    label="System Prompt"
-                    infoIcon={true}
-                    onValueChange={setSelectedModel}
-                    items={modelFiles.map((item) => item.split("\\").pop())}
-                />
+                <LabelAndInput type="textarea" label="System Prompt" infoIcon={true} onValueChange={setSelectedModel} />
                 <LabelAndInput
                     type="select"
                     label="Preload Prompt"
                     selectOptions={{selectText: "Select Preload prompt"}}
                     infoIcon={true}
-                    onValueChange={setSelectedModel}
-                    items={["User defined prompt", "User defined prompt", "User defined prompt"]}
+                    onValueChange={() => console.log("preload prompt value change")}
+                    items={[
+                        {item: "User defined prompt", value: "User defined prompt1"},
+                        {item: "User defined prompt", value: "User defined prompt2"},
+                        {item: "User defined prompt", value: "User defined prompt3"}
+                    ]}
                 />
                 <LabelAndInput type="textarea" label="Preload prompt preview" infoIcon={true} />
                 <div className="flex gap-[5px] items-center w-full">
@@ -110,7 +108,7 @@ interface LabelAndSelectProps {
     sliderOptions?: {defaultValue: number, maxValue: number, stepValue: number, setZeroToAuto: boolean},
     inputOptions?: {placeholder: string},
     label: string,
-    items?: (string | undefined)[],
+    items?: {item: string, value: string}[],
     onValueChange?: React.Dispatch<React.SetStateAction<string>>
 }
 function LabelAndInput({type, infoIcon, label, selectOptions, sliderOptions, inputOptions, items, onValueChange}: LabelAndSelectProps) {
@@ -180,8 +178,8 @@ function LabelAndInput({type, infoIcon, label, selectOptions, sliderOptions, inp
                         <SelectGroup>
                             {items!.map((item, index) => {
                                 return (
-                                    <SelectItem value={item!} key={index}>
-                                        {item}
+                                    <SelectItem value={item.value} key={index}>
+                                        {item.item}
                                     </SelectItem>
                                 );
                             })}

@@ -77,6 +77,9 @@ export class ElectronLlmRpc {
         async unload() {
             await llmFunctions.unload();
         },
+        async clearErrors() {
+            await llmFunctions.clearErrors();
+        },
         setChatSessionLoad: llmFunctions.chatSession.setChatSessionLoad,
         getState() {
             return llmState.state;

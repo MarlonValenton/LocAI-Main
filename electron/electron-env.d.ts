@@ -2,6 +2,7 @@
 /// <reference types="../src/interfaces/ChatSession" />
 /// <reference types="../src/interfaces/ChatSessionAndFilename" />
 /// <reference types="../src/interfaces/dialog" />
+/// <reference types="../src/interfaces/locaiconfig" />
 
 declare namespace NodeJS {
     interface ProcessEnv {
@@ -55,6 +56,10 @@ interface Window {
         /**
          * Export file
          */
-        exportFile(type: ExportDialogType, item: ChatSession): Promise<void>
+        exportFile(type: ExportDialogType, item: ChatSession): Promise<void>,
+        /**
+         * get config file as JSON
+         */
+        getConfig(): Promise<LocaiConfig>
     }
 }

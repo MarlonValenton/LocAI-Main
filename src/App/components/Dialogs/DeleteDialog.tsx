@@ -69,8 +69,8 @@ function ExtraInformationDialog({filename, modelName, inputTokens, outputTokens}
                     ["Model Name:", modelName],
                     ["Input Tokens:", inputTokens],
                     ["Output Tokens:", outputTokens]
-                ].map((value) => (
-                    <div className="flex flex-col leading-tight">
+                ].map((value, index) => (
+                    <div className="flex flex-col leading-tight" key={index}>
                         <span className="font-semibold">{value[0]}</span> {value[1]}
                     </div>
                 ))}

@@ -9,6 +9,7 @@ import {saveChatSession} from "./utils/saveChatSession.ts";
 import {chatSessionExists} from "./utils/chatSessionExists.ts";
 import {deleteChatSession} from "./utils/deleteChatSession.ts";
 import {exportFile} from "./utils/exportFile.ts";
+import {getConfig} from "./utils/getConfig.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -70,6 +71,7 @@ ipcMain.handle("save-chat-session", saveChatSession);
 ipcMain.handle("chat-session-exists", chatSessionExists);
 ipcMain.handle("delete-chat-session", deleteChatSession);
 ipcMain.handle("export-file", exportFile);
+ipcMain.handle("get-config", getConfig);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

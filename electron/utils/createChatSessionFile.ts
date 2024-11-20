@@ -4,8 +4,9 @@ import {readFileSync} from "node:fs";
 import {IpcMainInvokeEvent} from "electron";
 import ChatSessionFile from "../../src/interfaces/ChatSession";
 import ChatSessionAndFilename from "../../src/interfaces/ChatSessionAndFilename";
+import LocaiConfig from "../../src/interfaces/locaiconfig";
 
-const configFile = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
 
 export async function createChatSessionFile(event: IpcMainInvokeEvent, modelPath: string): Promise<ChatSessionAndFilename> {
     const chatSession: ChatSessionFile = {
@@ -17,7 +18,7 @@ export async function createChatSessionFile(event: IpcMainInvokeEvent, modelPath
         chatHistory: [
             {
                 type: "system",
-                text: "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible.\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something incorrectly. If you don't know the answer to a question, don't share false information."
+                text: configFile.defaultSystemPrompt
             }
         ]
     };

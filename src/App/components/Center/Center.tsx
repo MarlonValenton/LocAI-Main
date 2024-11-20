@@ -16,7 +16,6 @@ interface CenterProps {
     state: LlmState,
     selectedModel: string,
     loaded: boolean,
-    chatAreaRef: React.RefObject<HTMLDivElement>,
     generatingResult: boolean,
     loading: boolean,
     error?: string,
@@ -33,7 +32,6 @@ function Center({
     state,
     selectedModel,
     loaded,
-    chatAreaRef,
     generatingResult,
     loading,
     error,
@@ -161,7 +159,11 @@ function Center({
                     selectedModel={selectedModel}
                 />
             ) : (
-                <ChatArea ref={chatAreaRef} simplifiedChat={state.chatSession.simplifiedChat} isShowSystemPrompt={isShowSystemPrompt} />
+                <ChatArea
+                    simplifiedChat={state.chatSession.simplifiedChat}
+                    isShowSystemPrompt={isShowSystemPrompt}
+                    generatingResult={generatingResult}
+                />
             )}
             <BottomBar>
                 <BottomBarInput

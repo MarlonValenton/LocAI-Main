@@ -10,6 +10,7 @@ import {llmState} from "../state/llmState";
 import {electronLlmRpc} from "../rpc/llmRpc";
 import ChatSessionAndFilename from "../interfaces/ChatSessionAndFilename";
 import {ExportDialogType} from "../interfaces/dialog";
+import LocaiConfig from "../interfaces/locaiconfig";
 import Center from "./components/Center/Center";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SideBarButton from "./components/Sidebar/SidebarButton";
@@ -22,19 +23,21 @@ function App2(): JSX.Element {
     const [selectedChatSession, setSelectedChatSession] = useState<ChatSession>();
     const [selectedModel, setSelectedModel] = useState("");
     const [loadMessage, setloadMessage] = useState<string>();
+    const [systemPrompt, setSystemPrompt] = useState<string>("");
     const state = useExternalState(llmState);
     const {generatingResult} = state.chatSession;
-    const chatAreaRef = useRef<HTMLDivElement>(null);
+    // const chatAreaRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         console.log("Getting chat sessions from file system");
         getChatSessions().then((value) => setChatSessionsAndFilenames(value));
+
+        console.log("Getting default system prompt");
+        window.utils.getConfig().then((value: LocaiConfig) => setSystemPrompt(value.defaultSystemPrompt));
     }, []);
 
     useEffect(() => {
-        if (generatingResult) {
-            scrollToBottom();
-        } else {
+        if (!generatingResult) {
             const newChatSessionsAndFilenames: ChatSessionAndFilename[] = chatSessionsAndFilenames.map((chatSessionAndFilename) => {
                 if (JSON.stringify(chatSessionAndFilename.chatSession) === JSON.stringify(selectedChatSession)) {
                     console.log("Updating selected chat session");
@@ -66,19 +69,19 @@ function App2(): JSX.Element {
         }
     }, [generatingResult]);
 
-    useEffect(() => {
-        console.log("Scroll height changed");
+    // useEffect(() => {
+    //     console.log("Scroll height changed");
 
-        if (isScrolledToTheBottom()) {
-            scrollToBottom();
-        }
-    }, [chatAreaRef.current?.scrollHeight]);
+    //     if (isScrolledToTheBottom()) {
+    //         scrollToBottom();
+    //     }
+    // }, [chatAreaRef.current?.scrollHeight]);
 
     const loadChatSession = useCallback(
         async (index: number) => {
             console.log("Loading chat session");
             setloadMessage("Loading chat session");
-            await unload();
+            await clearErrors();
 
             if (chatSessionsAndFilenames) {
                 const chatSession = chatSessionsAndFilenames[index]?.chatSession;
@@ -180,7 +183,16 @@ function App2(): JSX.Element {
                 });
 
                 const newChatSessionsAndFilenames = chatSessionsAndFilenames.filter((chatSession, i) => i !== index);
+
                 setChatSessionsAndFilenames(newChatSessionsAndFilenames);
+                console.log("newChatSessionsAndFilenames set");
+
+                // setSelectedModel("");
+                // console.log("selected model set to empty");
+
+                // setSelectedChatSession(undefined);
+                // console.log("selected chat session set to undefined");
+
                 unload();
             } catch (err) {
                 updateChatSessions();
@@ -197,19 +209,19 @@ function App2(): JSX.Element {
         await window.utils.saveChatSession(chatSessionAndFilename.filename, chatSessionAndFilename.chatSession);
     }, []);
 
-    const isScrolledToTheBottom = useCallback(() => {
-        if (chatAreaRef.current != null) {
-            return chatAreaRef.current!.clientHeight / (chatAreaRef.current!.scrollHeight - chatAreaRef.current!.scrollTop) > 0.85;
-        }
+    // const isScrolledToTheBottom = useCallback(() => {
+    //     if (chatAreaRef.current != null) {
+    //         return chatAreaRef.current!.clientHeight / (chatAreaRef.current!.scrollHeight - chatAreaRef.current!.scrollTop) > 0.85;
+    //     }
 
-        return true;
-    }, []);
+    //     return true;
+    // }, []);
 
-    const scrollToBottom = useCallback(() => {
-        if (chatAreaRef.current != null) {
-            chatAreaRef.current!.scrollTop = chatAreaRef.current.scrollHeight;
-        }
-    }, []);
+    // const scrollToBottom = useCallback(() => {
+    //     if (chatAreaRef.current != null) {
+    //         chatAreaRef.current!.scrollTop = chatAreaRef.current.scrollHeight;
+    //     }
+    // }, []);
 
     const loadModelAndSession = useCallback(async () => {
         if (selectedModel) {
@@ -277,9 +289,19 @@ function App2(): JSX.Element {
 
     const unload = useCallback(async () => {
         console.log("Unloading state");
-        // setSelectedModel("");
-        // setSelectedChatSession(undefined);
+
+        setSelectedModel("");
+        console.log("selected model set to empty");
+
+        setSelectedChatSession(undefined);
+        console.log("selected chat session set to undefined");
+
         await electronLlmRpc.unload();
+    }, []);
+
+    const clearErrors = useCallback(async () => {
+        console.log("Clearing errors");
+        await electronLlmRpc.clearErrors();
     }, []);
 
     const exportFile = useCallback(
@@ -323,7 +345,6 @@ function App2(): JSX.Element {
                 state={state}
                 selectedModel={selectedModel}
                 loaded={loaded}
-                chatAreaRef={chatAreaRef}
                 generatingResult={generatingResult}
                 loading={loading}
                 error={error}
