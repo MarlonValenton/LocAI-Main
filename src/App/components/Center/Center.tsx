@@ -20,7 +20,9 @@ interface CenterProps {
     loading: boolean,
     error?: string,
     loadMessage?: string,
+    systemPrompt?: string,
     setSelectedModel: React.Dispatch<React.SetStateAction<string>>,
+    setSystemPrompt: React.Dispatch<React.SetStateAction<string>>,
     loadModelAndSession(): Promise<void>,
     stopActivePrompt(): void,
     onPromptInput(currentText: string): void,
@@ -36,7 +38,9 @@ function Center({
     loading,
     error,
     loadMessage,
+    systemPrompt,
     setSelectedModel,
+    setSystemPrompt,
     loadModelAndSession,
     stopActivePrompt,
     onPromptInput,
@@ -157,6 +161,8 @@ function Center({
                     setSelectedModel={setSelectedModel}
                     loadModelAndSession={loadModelAndSession}
                     selectedModel={selectedModel}
+                    systemPrompt={systemPrompt}
+                    setSystemPrompt={setSystemPrompt}
                 />
             ) : (
                 <ChatArea

@@ -26,7 +26,6 @@ function App2(): JSX.Element {
     const [systemPrompt, setSystemPrompt] = useState<string>("");
     const state = useExternalState(llmState);
     const {generatingResult} = state.chatSession;
-    // const chatAreaRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         console.log("Getting chat sessions from file system");
@@ -68,14 +67,6 @@ function App2(): JSX.Element {
             setChatSessionsAndFilenames(newChatSessionsAndFilenames);
         }
     }, [generatingResult]);
-
-    // useEffect(() => {
-    //     console.log("Scroll height changed");
-
-    //     if (isScrolledToTheBottom()) {
-    //         scrollToBottom();
-    //     }
-    // }, [chatAreaRef.current?.scrollHeight]);
 
     const loadChatSession = useCallback(
         async (index: number) => {
@@ -209,20 +200,6 @@ function App2(): JSX.Element {
         await window.utils.saveChatSession(chatSessionAndFilename.filename, chatSessionAndFilename.chatSession);
     }, []);
 
-    // const isScrolledToTheBottom = useCallback(() => {
-    //     if (chatAreaRef.current != null) {
-    //         return chatAreaRef.current!.clientHeight / (chatAreaRef.current!.scrollHeight - chatAreaRef.current!.scrollTop) > 0.85;
-    //     }
-
-    //     return true;
-    // }, []);
-
-    // const scrollToBottom = useCallback(() => {
-    //     if (chatAreaRef.current != null) {
-    //         chatAreaRef.current!.scrollTop = chatAreaRef.current.scrollHeight;
-    //     }
-    // }, []);
-
     const loadModelAndSession = useCallback(async () => {
         if (selectedModel) {
             console.log(`Loading ${selectedModel}`);
@@ -349,6 +326,8 @@ function App2(): JSX.Element {
                 loading={loading}
                 error={error}
                 loadMessage={loadMessage}
+                systemPrompt={systemPrompt}
+                setSystemPrompt={setSystemPrompt}
                 setSelectedModel={setSelectedModel}
                 loadModelAndSession={loadModelAndSession}
                 stopActivePrompt={stopActivePrompt}

@@ -1,6 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 import {useCallback, useEffect, useState} from "react";
+import {ClassValue} from "class-variance-authority/types";
 import Info from "../../../icons/info-circle.svg?react";
 import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue} from "../../shadcncomponents/select";
 import {Button} from "../../shadcncomponents/Button";
@@ -14,11 +15,19 @@ import {cn} from "../../../lib/utils";
 
 interface ModelSettingsProps {
     setSelectedModel: React.Dispatch<React.SetStateAction<string>>,
+    setSystemPrompt: React.Dispatch<React.SetStateAction<string>>,
     selectedModel: string,
+    systemPrompt?: string,
     loadModelAndSession(): Promise<void>
 }
 
-function ModelSettings({setSelectedModel, selectedModel, loadModelAndSession}: ModelSettingsProps): JSX.Element {
+function ModelSettings({
+    setSelectedModel,
+    setSystemPrompt,
+    selectedModel,
+    systemPrompt,
+    loadModelAndSession
+}: ModelSettingsProps): JSX.Element {
     const [modelFiles, setModelFiles] = useState<string[]>([]);
 
     if (modelFiles.length == 0) {
@@ -35,7 +44,13 @@ function ModelSettings({setSelectedModel, selectedModel, loadModelAndSession}: M
                     onValueChange={setSelectedModel}
                     items={modelFiles.map((item) => ({item: item.split("\\").pop()!, value: item}))}
                 />
-                <LabelAndInput type="textarea" label="System Prompt" infoIcon={true} onValueChange={setSelectedModel} />
+                <LabelAndInput
+                    type="textarea"
+                    textAreaOptions={{defaultValue: systemPrompt, style: "h-[120px]"}}
+                    label="System Prompt"
+                    infoIcon={true}
+                    onValueChange={setSystemPrompt}
+                />
                 <LabelAndInput
                     type="select"
                     label="Preload Prompt"
@@ -102,17 +117,28 @@ function ModelSettings({setSelectedModel, selectedModel, loadModelAndSession}: M
     );
 }
 
-interface LabelAndSelectProps {
+interface LabelAndInputProps {
     type: "select" | "textarea" | "input" | "slider",
     infoIcon?: boolean,
     selectOptions?: {selectText?: string},
+    textAreaOptions?: {defaultValue?: string, style?: ClassValue[] | ClassValue},
     sliderOptions?: {defaultValue: number, maxValue: number, stepValue: number, setZeroToAuto: boolean},
     inputOptions?: {placeholder: string},
     label: string,
     items?: {item: string, value: string}[],
     onValueChange?: React.Dispatch<React.SetStateAction<string>>
 }
-function LabelAndInput({type, infoIcon, label, selectOptions, sliderOptions, inputOptions, items, onValueChange}: LabelAndSelectProps) {
+function LabelAndInput({
+    type,
+    infoIcon,
+    label,
+    selectOptions,
+    textAreaOptions,
+    sliderOptions,
+    inputOptions,
+    items,
+    onValueChange
+}: LabelAndInputProps) {
     const [sliderValue, setSliderValue] = useState<number>(0);
 
     const onInputKeyDown = useCallback(
@@ -168,7 +194,11 @@ function LabelAndInput({type, infoIcon, label, selectOptions, sliderOptions, inp
                     </SelectContent>
                 </Select>
             ) : type === "textarea" ? (
-                <Textarea className="h-full max-h-[200px]" />
+                <Textarea
+                    className={cn("max-h-[200px]", textAreaOptions?.style)}
+                    defaultValue={textAreaOptions?.defaultValue}
+                    onChange={(e) => onValueChange!(e.target.value)}
+                />
             ) : type === "input" ? (
                 <Input outerClassName="h-fit" className="h-[30px]" placeholder={inputOptions?.placeholder} />
             ) : type === "slider" && sliderOptions ? (
