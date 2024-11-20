@@ -9,6 +9,7 @@ import Empty from "../../../icons/mist-off.svg?react";
 import {Button} from "../../shadcncomponents/Button";
 import {ExportDialogType} from "../../../interfaces/dialog";
 import ChatSessionAndFilename from "../../../interfaces/ChatSessionAndFilename";
+import {cn} from "../../../lib/utils";
 import SpecialButton from "./SpecialButton";
 
 interface SideBarProps {
@@ -34,11 +35,7 @@ function Sidebar({
 }: SideBarProps): JSX.Element {
     const [inputValue, setInputValue] = useState<string>("");
     const [filteredItems, setFilteredItems] = useState<ChatSessionAndFilename[]>();
-
-    let justify = "";
-    if (!filteredItems?.length) {
-        justify = "justify-center";
-    }
+    const [indexDisabled, setIndexDisabled] = useState<number>();
 
     useEffect(() => {
         if (inputValue !== "") {
@@ -51,7 +48,13 @@ function Sidebar({
         <div className="flex flex-col w-[260px] p-[8px] [&>*:not(:last-child)]:mb-[12px] bg-foreground h-screen flex-none">
             <div className="flex-none">
                 <div className="flex flex-row mb-[12px]">
-                    <Button className="w-full mr-[13px]" onClick={() => mainButtonFunction()}>
+                    <Button
+                        className="w-full mr-[13px]"
+                        onClick={() => {
+                            setIndexDisabled(undefined);
+                            mainButtonFunction();
+                        }}
+                    >
                         <Plus className="size-icon mr-[5px]" />
                         <p>{mainButton}</p>
                     </Button>
@@ -63,7 +66,10 @@ function Sidebar({
             </div>
             <Separator />
             <div
-                className={`flex flex-col flex-grow items-center ${justify} text-icon-gray [&>*:not(:last-child)]:mb-[10px] overflow-auto`}
+                className={cn(
+                    "flex flex-col flex-grow items-center text-icon-gray [&>*:not(:last-child)]:mb-[10px] overflow-auto",
+                    !filteredItems?.length ? "justify-center" : ""
+                )}
             >
                 {filteredItems?.length ? (
                     filteredItems?.map((item, index) => (
@@ -71,7 +77,11 @@ function Sidebar({
                             item={item}
                             key={index}
                             index={index}
-                            onClick={OnSelectItem}
+                            disabled={index === indexDisabled ? true : false}
+                            onClick={(e) => {
+                                setIndexDisabled(index);
+                                OnSelectItem(e);
+                            }}
                             onEnter={renameItem}
                             onDelete={deleteItem}
                             exportItem={() => {

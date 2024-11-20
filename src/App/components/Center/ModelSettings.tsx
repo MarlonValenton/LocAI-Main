@@ -10,6 +10,7 @@ import {Textarea} from "../../shadcncomponents/textarea";
 import {Separator} from "../../shadcncomponents/Separator";
 import {Slider} from "../../shadcncomponents/slider";
 import {Checkbox} from "../../shadcncomponents/checkbox";
+import {cn} from "../../../lib/utils";
 
 interface ModelSettingsProps {
     setSelectedModel: React.Dispatch<React.SetStateAction<string>>,
@@ -143,35 +144,15 @@ function LabelAndInput({type, infoIcon, label, selectOptions, sliderOptions, inp
         }
     }, []);
 
-    let labelStyle = "items-center";
-    let selectStyle = "ml-[10px]";
-    let flexStyle = "flex-row";
-    let labelPositionStyle = "w-fit";
-    if (type === "textarea") {
-        labelStyle = "items-start";
-    }
-
-    if (infoIcon && type === "select") {
-        selectStyle = "ml-0";
-    }
-
-    if (type === "slider") {
-        flexStyle = "flex-col";
-    }
-
-    if (type === "slider") {
-        labelPositionStyle = "w-full";
-    }
-
     return (
-        <div className={`flex ${flexStyle} ${labelStyle}`}>
-            <span className={`flex flex-none items-center ${labelPositionStyle}`}>
+        <div className={cn("flex items-center flex-row", type === "slider" ? "flex-col" : type === "textarea" ? "items-start" : "")}>
+            <span className={cn("flex flex-none items-center", type === "slider" ? "w-full" : "w-fit")}>
                 <Label className="text-[15px] whitespace-nowrap">{label}</Label>
                 {infoIcon ? <Info className="text-icon-gray size-[20px] mx-[5px]" /> : ""}
             </span>
             {type === "select" ? (
                 <Select onValueChange={onValueChange}>
-                    <SelectTrigger className={`h-[35px] ${selectStyle}`}>
+                    <SelectTrigger className={cn("h-[35px] ml-[10px]", infoIcon && type === "select" ? "ml-0" : "")}>
                         <SelectValue placeholder={selectOptions?.selectText} />
                     </SelectTrigger>
                     <SelectContent>

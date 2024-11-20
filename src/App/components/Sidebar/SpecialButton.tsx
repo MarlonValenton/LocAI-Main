@@ -9,17 +9,18 @@ import {Input} from "../../shadcncomponents/Input";
 import useClickOutside from "../../../hooks/useClickOutside";
 import {DeleteDialog} from "../Dialogs/DeleteDialog";
 import ChatSessionAndFilename from "../../../interfaces/ChatSessionAndFilename";
-
+import {cn} from "../../../lib/utils";
 interface SpecialButtonProps {
     item: ChatSessionAndFilename,
     index: number,
+    disabled: boolean,
     onClick(index: number): void,
     onEnter(event: React.KeyboardEvent, index: number, chatSession: string, callback: () => void): void,
     onDelete(index: number): void,
     exportItem(): void
 }
 
-function SpecialButton({item, index, onClick, onEnter, onDelete, exportItem}: SpecialButtonProps): JSX.Element {
+function SpecialButton({item, index, disabled, onClick, onEnter, onDelete, exportItem}: SpecialButtonProps): JSX.Element {
     const [isEditMode, setIsEditMode] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>("");
     const ref = useRef<HTMLInputElement>(null);
@@ -27,11 +28,18 @@ function SpecialButton({item, index, onClick, onEnter, onDelete, exportItem}: Sp
 
     return (
         <div
-            onClick={() => onClick(index)}
+            onClick={() => {
+                if (!disabled) {
+                    onClick(index);
+                }
+            }}
             onKeyDownCapture={(e) => onEnter(e, index, inputValue, () => setIsEditMode(false))}
-            className="flex flex-none items-center h-[40px] w-full px-[10px] rounded-[5px] text-cblack dark:text-cwhite bg-foreground-dark
+            className={cn(
+                `flex flex-none items-center h-[40px] w-full px-[10px] rounded-[5px] text-cblack dark:text-cwhite bg-foreground-dark
       dark:bg-background-light text-[15px] select-none hover:bg-foreground-dark/60 hover:dark:bg-white/20
-      active:bg-foreground-dark/40 active:dark:bg-white/30 cursor-pointer"
+      active:bg-foreground-dark/40 active:dark:bg-white/30 cursor-pointer`,
+                disabled ? "bg-foreground-dark/60 dark:bg-primary/20" : ""
+            )}
         >
             <Chat className="mr-[6px] size-[20px] text-primary overflow-visible" />
             {isEditMode ? (
@@ -41,9 +49,10 @@ function SpecialButton({item, index, onClick, onEnter, onDelete, exportItem}: Sp
                     placeholder={item.chatSession.name}
                     onClick={(e) => e.stopPropagation()}
                     onChange={(e) => setInputValue(e.target.value)}
+                    autoFocus={true}
                 />
             ) : (
-                <span className="truncate">{item.chatSession.name}</span>
+                <span className={cn("truncate", disabled ? "font-semibold" : "font-normal")}>{item.chatSession.name}</span>
             )}
             {!isEditMode ? (
                 <div className="flex flex-1 justify-end items-center">

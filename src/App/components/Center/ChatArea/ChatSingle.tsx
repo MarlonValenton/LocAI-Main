@@ -9,6 +9,7 @@ import User from "../../../../icons/user.svg?react";
 import Copy from "../../../../icons/copy.svg?react";
 import Check from "../../../../icons/check.svg?react";
 import System from "../../../../icons/device-desktop.svg?react";
+import {cn} from "../../../../lib/utils";
 
 type ChatSingleProps = {
     type: string,
@@ -20,16 +21,8 @@ function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
     const [isCopyClicked, setIsCopyClicked] = useState<boolean>(false);
     const isDark = document.querySelector("html")?.classList.contains("dark");
 
-    let backgroundColor;
-
-    if (index % 2 === 0) {
-        backgroundColor = "foreground";
-    } else {
-        backgroundColor = "transparent";
-    }
-
     return (
-        <div className={`w-full bg-foreground py-[20px] px-[10%] bg-${backgroundColor}`}>
+        <div className={cn("w-full bg-foreground py-[20px] px-[10%]", index % 2 === 0 ? "bg-foreground" : "bg-transparent")}>
             <div className="flex w-full">
                 <div className="text-primary h-full mr-[30px]">
                     {type === "user" ? (
