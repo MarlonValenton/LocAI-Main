@@ -38,7 +38,7 @@ function SpecialButton({item, index, disabled, onClick, onEnter, onDelete, expor
                 `flex flex-none items-center h-[40px] w-full px-[10px] rounded-[5px] text-cblack dark:text-cwhite bg-foreground-dark
       dark:bg-background-light text-[15px] select-none hover:bg-foreground-dark/60 hover:dark:bg-white/20
       active:bg-foreground-dark/40 active:dark:bg-white/30 cursor-pointer`,
-                disabled ? "bg-foreground-dark/60 dark:bg-primary/20" : ""
+                disabled ? "bg-primary/20 dark:bg-primary/20" : ""
             )}
         >
             <Chat className="mr-[6px] size-[20px] text-primary overflow-visible" />
