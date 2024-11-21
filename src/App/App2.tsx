@@ -51,7 +51,7 @@ function App2(): JSX.Element {
     }, []);
 
     useEffect(() => {
-        console.log("generating result");
+        console.log(`generating result ${generatingResult}`);
 
         if (!generatingResult) {
             const newChatSessionsAndFilenames: ChatSessionAndFilename[] = chatSessionsAndFilenames.map((chatSessionAndFilename) => {
@@ -172,6 +172,8 @@ function App2(): JSX.Element {
     const deleteChatSession = useCallback(
         (index: number) => {
             console.log(`Deleting chat session index ${index}`);
+            setPromptSelectedIndex(undefined);
+            setInputValue("");
 
             try {
                 const toDeleteChatSession = chatSessionsAndFilenames[index];
@@ -510,6 +512,7 @@ function App2(): JSX.Element {
 
             if (!inputRef.current?.disabled && promptsAndFilenames) {
                 setInputValue(promptsAndFilenames[index]!.prompt.prompt);
+                onInput();
             } else console.warn("input ref is disabled");
         },
         [promptsAndFilenames]
