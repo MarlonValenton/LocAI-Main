@@ -51,6 +51,8 @@ function App2(): JSX.Element {
     }, []);
 
     useEffect(() => {
+        console.log("generating result");
+
         if (!generatingResult) {
             const newChatSessionsAndFilenames: ChatSessionAndFilename[] = chatSessionsAndFilenames.map((chatSessionAndFilename) => {
                 if (JSON.stringify(chatSessionAndFilename.chatSession) === JSON.stringify(selectedChatSession)) {
@@ -334,6 +336,8 @@ function App2(): JSX.Element {
     }, []);
 
     const stopActivePrompt = useCallback(() => {
+        console.log("Stop active prompt");
+
         void electronLlmRpc.stopActivePrompt();
     }, []);
 
@@ -437,10 +441,18 @@ function App2(): JSX.Element {
     }, []);
 
     const submitPrompt = useCallback(() => {
-        if (generatingResult || inputRef.current == null) return;
+        console.log("submitting prompt");
+
+        if (generatingResult || inputRef.current == null) {
+            console.warn("Input is null");
+            return;
+        }
 
         const message = inputRef.current.value;
-        if (message.length === 0) return;
+        if (message.length === 0) {
+            console.warn("Input is empty");
+            return;
+        }
 
         setInputValue("");
         resizeInput();
@@ -483,8 +495,6 @@ function App2(): JSX.Element {
     const [promptSelectedIndex, setPromptSelectedIndex] = useState<number>();
     const [chatSessionInputValue, setChatSessionInputValue] = useState<string>("");
     const [promptInputValue, setPromptInputValue] = useState<string>("");
-
-    console.log("Asd");
 
     // Sidebar prompt
     const loadPrompt = useCallback(

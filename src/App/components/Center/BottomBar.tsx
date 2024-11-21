@@ -49,19 +49,34 @@ function BottomBarInput({
             autocomplete={inputText + autocompleteText}
             placeholder={inputText + autocompleteText === "" ? "Type a message..." : ""}
             startIcon={
-                <button className="text-primary p-[5px] rounded-[5px] hover:bg-black/5 dark:hover:bg-white/10">
+                <Button
+                    variant="transparent_full"
+                    size="icon_tight"
+                    className="text-primary p-[5px] rounded-[5px] hover:bg-black/5 dark:hover:bg-white/10"
+                    disabled={disabled}
+                >
                     <Bolt className="size-[23px]" />
-                </button>
+                </Button>
             }
             endIcon={
                 generatingResult ? (
-                    <button className="text-primary p-[5px] rounded-[5px] hover:bg-black/5 dark:hover:bg-white/10">
+                    <Button
+                        variant="transparent_full"
+                        size="icon_tight"
+                        className="text-primary p-[5px] rounded-[5px] hover:bg-black/5 dark:hover:bg-white/10"
+                        disabled={disabled}
+                    >
                         <Stop className="size-[23px]" onClick={stopGeneration} />
-                    </button>
+                    </Button>
                 ) : (
-                    <button className="text-primary p-[5px] rounded-[5px] hover:bg-black/5 dark:hover:bg-white/10">
+                    <Button
+                        variant="transparent_full"
+                        size="icon_tight"
+                        className="text-primary p-[5px] rounded-[5px] hover:bg-black/5 dark:hover:bg-white/10"
+                        disabled={disabled || !inputText}
+                    >
                         <Send className="size-[23px]" onClick={submitPrompt} />
-                    </button>
+                    </Button>
                 )
             }
             disabled={disabled}
