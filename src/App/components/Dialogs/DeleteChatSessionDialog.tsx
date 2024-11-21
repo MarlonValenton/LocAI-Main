@@ -55,9 +55,11 @@ export function DeleteChatSessionDialog({ChatSessionAndFilename, children, delet
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button className="w-[100px]" variant="negative" onClick={() => deleteItem()}>
-                            Delete
-                        </Button>
+                        <DialogClose asChild>
+                            <Button className="w-[100px]" variant="negative" onClick={() => deleteItem()}>
+                                Delete
+                            </Button>
+                        </DialogClose>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
