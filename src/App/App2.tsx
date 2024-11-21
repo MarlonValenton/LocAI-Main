@@ -172,7 +172,6 @@ function App2(): JSX.Element {
     const deleteChatSession = useCallback(
         (index: number) => {
             console.log(`Deleting chat session index ${index}`);
-            setPromptSelectedIndex(undefined);
             setInputValue("");
 
             try {
@@ -192,6 +191,9 @@ function App2(): JSX.Element {
 
                 if (chatSessionSelectedIndex === index) {
                     setChatSessionSelectedIndex(undefined);
+                    unload();
+                } else if (chatSessionSelectedIndex! >= index) {
+                    setChatSessionSelectedIndex((value) => (value ? value - 1 : value));
                 }
 
                 // setSelectedModel("");
@@ -199,8 +201,6 @@ function App2(): JSX.Element {
 
                 // setSelectedChatSession(undefined);
                 // console.log("selected chat session set to undefined");
-
-                unload();
             } catch (err) {
                 updateChatSessions();
             }
