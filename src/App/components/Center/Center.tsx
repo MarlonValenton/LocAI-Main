@@ -1,15 +1,9 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useEffect} from "react";
 import {LlmState} from "../../../../electron/state/llmState";
-import Plus from "../../../icons/plus.svg?react";
-import FileExport from "../../../icons/file-export.svg?react";
 import Error from "../../../icons/exclamation-circle.svg?react";
-import {Switch} from "../../shadcncomponents/switch";
-import {BottomBar, BottomBarInput, QuickSettings, QuickSettingsItem} from "./BottomBar";
 import ModelSettings from "./ModelSettings";
-import StatusBar from "./StatusBar";
-import StatusBarItems from "./StatusBarItem";
 import ChatArea from "./ChatArea/ChatArea";
 import Loading from "./Loading";
 interface CenterProps {
