@@ -10,8 +10,8 @@ import SpecialButton from "./SpecialButton";
 interface SidebarCenterProps {
     items?: ChatSessionAndFilename[] | PromptAndFilename[],
     inputValue: string,
-    indexDisabled?: number,
-    setIndexDisabled: React.Dispatch<React.SetStateAction<number | undefined>>,
+    selectedIndex?: number,
+    setSelectedIndex: React.Dispatch<React.SetStateAction<number | undefined>>,
     OnSelectItem(index: number): void,
     renameItem(event: React.KeyboardEvent, index: number, itemName: string): void,
     deleteItem(index: number): void,
@@ -20,8 +20,8 @@ interface SidebarCenterProps {
 function SidebarCenter({
     items,
     inputValue,
-    indexDisabled,
-    setIndexDisabled,
+    selectedIndex,
+    setSelectedIndex,
     OnSelectItem,
     renameItem,
     deleteItem,
@@ -62,9 +62,9 @@ function SidebarCenter({
                         item={item}
                         key={index}
                         index={index}
-                        disabled={index === indexDisabled ? true : false}
+                        disabled={index === selectedIndex ? true : false}
                         onClick={() => {
-                            setIndexDisabled(index);
+                            setSelectedIndex(index);
                             OnSelectItem(index);
                         }}
                         renameItem={renameItem}

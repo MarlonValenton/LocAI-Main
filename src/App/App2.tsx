@@ -445,7 +445,7 @@ function App2(): JSX.Element {
         setInputValue("");
         resizeInput();
         onPromptInput?.("");
-        setPromptindexDisabled(undefined);
+        setPromptSelectedIndex(undefined);
         sendPrompt(message);
     }, [setInputValue, generatingResult, resizeInput, sendPrompt, onPromptInput]);
 
@@ -479,21 +479,24 @@ function App2(): JSX.Element {
     );
 
     // Sidebar chat session
-    const [chatSessionindexDisabled, setChatSessionIndexDisabled] = useState<number>();
-    const [promptindexDisabled, setPromptindexDisabled] = useState<number>();
+    const [chatSessionSelectedIndex, setChatSessionSelectedIndex] = useState<number>();
+    const [promptSelectedIndex, setPromptSelectedIndex] = useState<number>();
     const [chatSessionInputValue, setChatSessionInputValue] = useState<string>("");
     const [promptInputValue, setPromptInputValue] = useState<string>("");
 
     console.log("Asd");
 
     // Sidebar prompt
-    const loadPrompt = useCallback((index: number) => {
-        console.log("Loading prompt to input ref");
+    const loadPrompt = useCallback(
+        (index: number) => {
+            console.log("Loading prompt to input ref");
 
-        if (!inputRef.current?.disabled && promptsAndFilenames) {
-            setInputValue(promptsAndFilenames[index]!.prompt.prompt);
-        } else console.warn("input ref is disabled");
-    }, []);
+            if (!inputRef.current?.disabled && promptsAndFilenames) {
+                setInputValue(promptsAndFilenames[index]!.prompt.prompt);
+            } else console.warn("input ref is disabled");
+        },
+        [promptsAndFilenames]
+    );
 
     return (
         <div className="flex flex-row">
@@ -502,7 +505,8 @@ function App2(): JSX.Element {
                     <SidebarTopButton>
                         <Button
                             onClick={() => {
-                                setChatSessionIndexDisabled(undefined);
+                                setChatSessionSelectedIndex(undefined);
+                                setInputValue("");
                                 unload();
                             }}
                         >
@@ -517,8 +521,8 @@ function App2(): JSX.Element {
                 <SidebarCenter
                     items={chatSessionsAndFilenames}
                     inputValue={chatSessionInputValue}
-                    indexDisabled={chatSessionindexDisabled}
-                    setIndexDisabled={setChatSessionIndexDisabled}
+                    selectedIndex={chatSessionSelectedIndex}
+                    setSelectedIndex={setChatSessionSelectedIndex}
                     OnSelectItem={loadChatSession}
                     renameItem={renameChatSession}
                     deleteItem={deleteChatSession}
@@ -593,7 +597,7 @@ function App2(): JSX.Element {
                             <DialogTrigger asChild>
                                 <Button
                                     onClick={() => {
-                                        setPromptindexDisabled(undefined);
+                                        setPromptSelectedIndex(undefined);
                                     }}
                                 >
                                     <Plus className="size-icon mr-[5px]" />
@@ -616,8 +620,8 @@ function App2(): JSX.Element {
                 <SidebarCenter
                     items={promptsAndFilenames}
                     inputValue={promptInputValue}
-                    indexDisabled={promptindexDisabled}
-                    setIndexDisabled={setPromptindexDisabled}
+                    selectedIndex={promptSelectedIndex}
+                    setSelectedIndex={setPromptSelectedIndex}
                     OnSelectItem={loadPrompt}
                     renameItem={renamePrompt}
                     deleteItem={deletePrompt}
