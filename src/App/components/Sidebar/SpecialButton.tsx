@@ -16,7 +16,7 @@ import {DeletePromptDialog} from "../Dialogs/DeletePromptDialog";
 interface SpecialButtonProps {
     item: ChatSessionAndFilename | PromptAndFilename,
     index: number,
-    disabled: boolean,
+    disabled?: boolean,
     onClick(): void,
     renameItem(event: React.KeyboardEvent, index: number, itemName: string): void,
     deleteItem(index: number): void,
@@ -31,7 +31,7 @@ function SpecialButton({item, index, disabled, onClick, renameItem, deleteItem, 
 
     return (
         <div
-            onClick={() => (!disabled ? onClick() : "")}
+            onClick={() => (disabled !== undefined ? (!disabled ? onClick() : "") : onClick())}
             onKeyDownCapture={(e) => {
                 if (e.key === "Escape") {
                     console.log("Escape key entered. Removing input element");

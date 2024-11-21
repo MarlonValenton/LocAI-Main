@@ -62,7 +62,7 @@ function SidebarCenter({
                         item={item}
                         key={index}
                         index={index}
-                        disabled={index === selectedIndex ? true : false}
+                        disabled={"chatSession" in item ? (index === selectedIndex ? true : false) : undefined}
                         onClick={() => {
                             setSelectedIndex(index);
                             OnSelectItem(index);
