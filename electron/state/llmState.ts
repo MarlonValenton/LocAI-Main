@@ -477,7 +477,7 @@ export const llmFunctions = {
         async saveChatHistory(chatSessionName?: string) {
             if (chatSession == null) throw new Error("Chat session not loaded");
 
-            await fs.mkdir(configFile.chatSessionDirectory, {recursive: true});
+            await fs.mkdir(configFile.chatSessionsDirectory, {recursive: true});
 
             const saveDate = new Date();
             const filename = `chat_session_${saveDate.toISOString().split("T")[0]?.replaceAll("-", "_")}_${saveDate.getTime().toString()}.json`;
@@ -491,7 +491,7 @@ export const llmFunctions = {
                 chatHistory: chatSession.getChatHistory()
             };
 
-            await fs.writeFile(path.join(configFile.chatSessionDirectory, filename), JSON.stringify(chatSessionJson), "utf-8");
+            await fs.writeFile(path.join(configFile.chatSessionsDirectory, filename), JSON.stringify(chatSessionJson), "utf-8");
         },
         async loadChatHistory(chatHistory: ChatHistoryItem[], inputTokens: number, outputTokens: number) {
             await withLock(llmFunctions, "chatSession", async () => {

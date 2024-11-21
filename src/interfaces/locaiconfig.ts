@@ -1,5 +1,6 @@
 export default interface LocaiConfig {
     modelsDirectory: string,
-    chatSessionDirectory: string,
+    chatSessionsDirectory: string,
+    promptsDirectory: string,
     defaultSystemPrompt: string
 }

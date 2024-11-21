@@ -23,12 +23,12 @@ export async function createChatSessionFile(event: IpcMainInvokeEvent, modelPath
         ]
     };
 
-    await fs.mkdir(configFile.chatSessionDirectory, {recursive: true});
+    await fs.mkdir(configFile.chatSessionsDirectory, {recursive: true});
 
     const saveDate = new Date();
     const filename = `chat_session_${saveDate.toISOString().split("T")[0]?.replaceAll("-", "_")}_${saveDate.getTime().toString()}.json`;
 
-    await fs.writeFile(path.join(configFile.chatSessionDirectory, filename), JSON.stringify(chatSession, null, 2), "utf-8");
+    await fs.writeFile(path.join(configFile.chatSessionsDirectory, filename), JSON.stringify(chatSession, null, 2), "utf-8");
 
-    return {filename: filename, path: configFile.chatSessionDirectory, chatSession: chatSession};
+    return {filename: filename, path: path.resolve(configFile.chatSessionsDirectory), chatSession: chatSession};
 }

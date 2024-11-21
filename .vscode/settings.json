@@ -2,6 +2,14 @@
     "files.associations": {
         "*.css": "tailwindcss"
     },
+    "tailwindCSS.experimental.classRegex": [
+        [".+ClassName\\=([^;]*);", "'([^']*)'"],
+        [".+ClassName\\=([^;]*);", "\"([^\"]*)\""],
+        [".+ClassName\\=([^;]*);", "\\`([^\\`]*)\\`"],
+        ["className: ([\",',`].+?[\",',`])", "'([^']*)'"],
+        ["className: ([\",',`].+?[\",',`])", "\"([^\"]*)\""],
+        ["className: ([\",',`].+?[\",',`])", "\\`([^\\`]*)\\`"]
+    ],
     "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
     "editor.formatOnType": false, // required
     "editor.formatOnPaste": true, // optional

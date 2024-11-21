@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {useCallback, useEffect, useState} from "react";
+import {HTMLProps, useCallback, useEffect, useState} from "react";
 import {ClassValue} from "class-variance-authority/types";
 import Info from "../../../icons/info-circle.svg?react";
 import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue} from "../../shadcncomponents/select";
@@ -36,7 +36,7 @@ function ModelSettings({
 
     return (
         <div className="flex flex-col flex-grow justify-center items-center">
-            <div className="flex flex-col w-[650px] min-h-[400px] lg:max-h-[448px] 2xl:max-h-fit border-[1px] border-border-gray rounded-[5px] px-[20px] py-[25px] text-[20px] [&>*:not(:last-child)]:mb-3 overflow-y-auto">
+            <div className="flex flex-col w-[700px] min-h-[400px] lg:max-h-[448px] 2xl:max-h-fit border-[1px] border-border-gray rounded-[5px] px-[20px] py-[25px] text-[20px] [&>*:not(:last-child)]:mb-3 overflow-y-auto">
                 <LabelAndInput
                     type="select"
                     label="Model"
@@ -46,7 +46,7 @@ function ModelSettings({
                 />
                 <LabelAndInput
                     type="textarea"
-                    textAreaOptions={{defaultValue: systemPrompt, style: "h-[120px]"}}
+                    textAreaOptions={{defaultValue: systemPrompt, className: "h-[90px]"}}
                     label="System Prompt"
                     infoIcon={true}
                     onValueChange={setSystemPrompt}
@@ -121,7 +121,7 @@ interface LabelAndInputProps {
     type: "select" | "textarea" | "input" | "slider",
     infoIcon?: boolean,
     selectOptions?: {selectText?: string},
-    textAreaOptions?: {defaultValue?: string, style?: ClassValue[] | ClassValue},
+    textAreaOptions?: {defaultValue?: string, className?: string},
     sliderOptions?: {defaultValue: number, maxValue: number, stepValue: number, setZeroToAuto: boolean},
     inputOptions?: {placeholder: string},
     label: string,
@@ -195,7 +195,7 @@ function LabelAndInput({
                 </Select>
             ) : type === "textarea" ? (
                 <Textarea
-                    className={cn("max-h-[200px]", textAreaOptions?.style)}
+                    className={cn("max-h-[200px] resize-none", textAreaOptions?.className)}
                     defaultValue={textAreaOptions?.defaultValue}
                     onChange={(e) => onValueChange!(e.target.value)}
                 />

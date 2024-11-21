@@ -10,9 +10,13 @@ import {chatSessionExists} from "./utils/chatSessionExists.ts";
 import {deleteChatSession} from "./utils/deleteChatSession.ts";
 import {exportFile} from "./utils/exportFile.ts";
 import {getConfig} from "./utils/getConfig.ts";
+import {createPromptFile} from "./utils/createPromptFile.ts";
+import {getPrompts} from "./utils/getPrompts.ts";
+import {promptExists} from "./utils/promptExists.ts";
+import {savePrompt} from "./utils/savePrompt.ts";
+import {deletePrompt} from "./utils/deletePrompt.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -36,7 +40,9 @@ function createWindow() {
     win = new BrowserWindow({
         icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
         webPreferences: {
-            preload: path.join(__dirname, "preload.mjs")
+            preload: path.join(__dirname, "preload.mjs"),
+            devTools: true,
+            nodeIntegration: true
         },
         width: 1280,
         height: 720,
@@ -62,6 +68,8 @@ function createWindow() {
 
     if (VITE_DEV_SERVER_URL) void win.loadURL(VITE_DEV_SERVER_URL);
     else void win.loadFile(path.join(RENDERER_DIST, "index.html"));
+
+    win.webContents.openDevTools();
 }
 
 ipcMain.handle("get-model-files", getModelFiles);
@@ -72,6 +80,11 @@ ipcMain.handle("chat-session-exists", chatSessionExists);
 ipcMain.handle("delete-chat-session", deleteChatSession);
 ipcMain.handle("export-file", exportFile);
 ipcMain.handle("get-config", getConfig);
+ipcMain.handle("create-prompt-file", createPromptFile);
+ipcMain.handle("get-prompts", getPrompts);
+ipcMain.handle("prompt-exists", promptExists);
+ipcMain.handle("save-prompt", savePrompt);
+ipcMain.handle("delete-prompt", deletePrompt);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

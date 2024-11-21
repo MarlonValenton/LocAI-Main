@@ -14,7 +14,8 @@ import "./input.css";
 // color labels for items?
 // special button extra info?
 // advanced sidebar search
-// preserve window size
+// handle export
+// rename functions remove event
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>

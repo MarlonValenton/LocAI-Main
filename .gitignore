@@ -7,4 +7,5 @@ node_modules
 /dist-electron
 /release
 /models
-/chat_session
+/chat_sessions
+/prompts

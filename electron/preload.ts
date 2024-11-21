@@ -3,6 +3,8 @@ import ChatSession from "../src/interfaces/ChatSession";
 import ChatSessionAndFilename from "../src/interfaces/ChatSessionAndFilename";
 import {ExportDialogType} from "../src/interfaces/dialog";
 import LocaiConfig from "../src/interfaces/locaiconfig";
+import PromptAndFilename from "../src/interfaces/PromptAndFilename";
+import Prompt from "../src/interfaces/Prompt";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
@@ -35,7 +37,13 @@ contextBridge.exposeInMainWorld("utils", {
     saveChatSession: (filename: string, chatSession: ChatSession): Promise<void> =>
         ipcRenderer.invoke("save-chat-session", filename, chatSession),
     chatSessionExists: (filename: string): Promise<boolean> => ipcRenderer.invoke("chat-session-exists", filename),
-    deleteChatSession: (filename: string): Promise<boolean> => ipcRenderer.invoke("delete-chat-session", filename),
+    deleteChatSession: (filename: string): Promise<void> => ipcRenderer.invoke("delete-chat-session", filename),
     exportFile: (type: ExportDialogType, item: ChatSession): Promise<void> => ipcRenderer.invoke("export-file", type, item),
-    getConfig: (): Promise<LocaiConfig> => ipcRenderer.invoke("get-config")
+    getConfig: (): Promise<LocaiConfig> => ipcRenderer.invoke("get-config"),
+    createPromptFile: (name: string, description: string, prompt: string): Promise<PromptAndFilename> =>
+        ipcRenderer.invoke("create-prompt-file", name, description, prompt),
+    getPrompts: (): Promise<PromptAndFilename> => ipcRenderer.invoke("get-prompts"),
+    promptExists: (filename: string): Promise<boolean> => ipcRenderer.invoke("prompt-exists", filename),
+    savePrompt: (filename: string, prompt: Prompt): Promise<boolean> => ipcRenderer.invoke("save-prompt", filename, prompt),
+    deletePrompt: (filename: string): Promise<void> => ipcRenderer.invoke("delete-prompt", filename)
 });

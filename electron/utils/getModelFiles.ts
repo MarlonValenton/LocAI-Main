@@ -1,7 +1,8 @@
 import {readdirSync, readFileSync} from "fs";
 import path from "path";
+import LocaiConfig from "../../src/interfaces/locaiconfig";
 
-const configFile = JSON.parse(readFileSync("./locaiconfig.json", "utf-8"));
+const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", "utf-8"));
 
 /**
  * Get all available `models` in models folder

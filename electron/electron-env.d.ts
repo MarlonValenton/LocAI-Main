@@ -3,6 +3,8 @@
 /// <reference types="../src/interfaces/ChatSessionAndFilename" />
 /// <reference types="../src/interfaces/dialog" />
 /// <reference types="../src/interfaces/locaiconfig" />
+/// <reference types="../src/interfaces/PromptAndFilename" />
+/// <reference types="../src/interfaces/Prompt" />
 
 declare namespace NodeJS {
     interface ProcessEnv {
@@ -52,7 +54,7 @@ interface Window {
         /**
          * PERMANENTLY delete a file
          */
-        deleteChatSession(filename: string): Promise<boolean>,
+        deleteChatSession(filename: string): Promise<void>,
         /**
          * Export file
          */
@@ -60,6 +62,26 @@ interface Window {
         /**
          * get config file as JSON
          */
-        getConfig(): Promise<LocaiConfig>
+        getConfig(): Promise<LocaiConfig>,
+        /**
+         * create Prompt file
+         */
+        createPromptFile(name: string, description: string, prompt: string): Promise<PromptAndFilename>,
+        /**
+         * get prompt files
+         */
+        getPrompts(): Promise<PromptAndFilename>,
+        /**
+         * Check if file exists
+         */
+        promptExists(filename: string): Promise<PromptAndFilename>,
+        /**
+         * save prompt
+         */
+        savePrompt(filename: string, prompt: Prompt): Promise<void>,
+        /**
+         * delete prompt
+         */
+        deletePrompt(filename: string): Promise<void>
     }
 }

@@ -6,6 +6,9 @@ import LocaiConfig from "../../src/interfaces/locaiconfig";
 
 const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
 
-export async function deleteChatSession(event: IpcMainInvokeEvent, filename: string): Promise<void> {
-    fs.unlink(path.join(configFile.chatSessionsDirectory, filename));
+export async function promptExists(event: IpcMainInvokeEvent, filename: string): Promise<boolean> {
+    return fs
+        .access(path.join(configFile.promptsDirectory, filename))
+        .then(() => true)
+        .catch(() => false);
 }

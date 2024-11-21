@@ -1,9 +1,10 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import Trash from "../icons/trash.svg?react";
 import FileExport from "../icons/file-export.svg?react";
 import Settings from "../icons/settings.svg?react";
+import Plus from "../icons/plus.svg?react";
 import ChatSession from "../interfaces/ChatSession";
 import {useExternalState} from "../hooks/useExternalState";
 import {llmState} from "../state/llmState";
@@ -11,15 +12,26 @@ import {electronLlmRpc} from "../rpc/llmRpc";
 import ChatSessionAndFilename from "../interfaces/ChatSessionAndFilename";
 import {ExportDialogType} from "../interfaces/dialog";
 import LocaiConfig from "../interfaces/locaiconfig";
+import PromptAndFilename from "../interfaces/PromptAndFilename";
 import Center from "./components/Center/Center";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SideBarButton from "./components/Sidebar/SidebarButton";
 import SidebarButtonGroup from "./components/Sidebar/SidebarButtonsGroup";
 import {Button} from "./shadcncomponents/Button";
+import {SidebarTop, SidebarTopButton} from "./components/Sidebar/SidebarTop";
+import {Separator} from "./shadcncomponents/Separator";
+import {SidebarCenter} from "./components/Sidebar/SidebarCenter";
+import StatusBar from "./components/Center/StatusBar";
+import StatusBarItems from "./components/Center/StatusBarItem";
+import {BottomBar, BottomBarInput, QuickSettings, QuickSettingsItem} from "./components/Center/BottomBar";
+import {Switch} from "./shadcncomponents/switch";
+import CreatePromptDialog from "./components/Dialogs/CreatePromptDialog";
+import {Dialog, DialogContent, DialogTrigger} from "./shadcncomponents/dialog";
 
 function App2(): JSX.Element {
     const [isDarkMode, setDarkMode] = useState(false);
     const [chatSessionsAndFilenames, setChatSessionsAndFilenames] = useState<ChatSessionAndFilename[]>([]);
+    const [promptsAndFilenames, setPromptsAndFilenames] = useState<PromptAndFilename[]>([]);
     const [selectedChatSession, setSelectedChatSession] = useState<ChatSession>();
     const [selectedModel, setSelectedModel] = useState("");
     const [loadMessage, setloadMessage] = useState<string>();
@@ -30,6 +42,9 @@ function App2(): JSX.Element {
     useEffect(() => {
         console.log("Getting chat sessions from file system");
         getChatSessions().then((value) => setChatSessionsAndFilenames(value));
+
+        console.log("Getting prompts from file system");
+        getPrompts().then((value) => setPromptsAndFilenames(value));
 
         console.log("Getting default system prompt");
         window.utils.getConfig().then((value: LocaiConfig) => setSystemPrompt(value.defaultSystemPrompt));
@@ -117,43 +132,36 @@ function App2(): JSX.Element {
     );
 
     const renameChatSession = useCallback(
-        (event: React.KeyboardEvent, index: number, chatSessionName: string, callback: () => void) => {
+        (event: React.KeyboardEvent, index: number, itemName: string) => {
             console.log("Renaming chat session");
 
-            if (event.key === "Escape") {
-                console.log("Escape key entered. Removing input element");
-                callback();
-            } else if (event.key === "Enter") {
-                try {
-                    const newChatSessionsAndFilenames = chatSessionsAndFilenames.map((chatSessionAndFilename, i) => {
-                        if (i === index) {
-                            console.log(`Updating chat session of index ${index}`);
+            try {
+                const newChatSessionsAndFilenames = chatSessionsAndFilenames.map((chatSessionAndFilename, i) => {
+                    if (i === index) {
+                        console.log(`Updating chat session of index ${index}`);
 
-                            const newChatSessionAndFilename: ChatSessionAndFilename = {
-                                ...chatSessionAndFilename,
-                                chatSession: {
-                                    ...chatSessionAndFilename.chatSession,
-                                    name: chatSessionName ? chatSessionName : chatSessionAndFilename.chatSession.name
-                                }
-                            };
-                            console.log({newChatSessionAndFilename});
+                        const newChatSessionAndFilename: ChatSessionAndFilename = {
+                            ...chatSessionAndFilename,
+                            chatSession: {
+                                ...chatSessionAndFilename.chatSession,
+                                name: itemName ? itemName : chatSessionAndFilename.chatSession.name
+                            }
+                        };
+                        console.log({newChatSessionAndFilename});
 
-                            window.utils.chatSessionExists(newChatSessionAndFilename.filename).then((value) => {
-                                if (value === true) {
-                                    saveChatSession(newChatSessionAndFilename);
-                                } else {
-                                    throw Error("File does not exist");
-                                }
-                            });
-                            return newChatSessionAndFilename;
-                        } else return chatSessionAndFilename;
-                    });
-                    setChatSessionsAndFilenames(newChatSessionsAndFilenames);
-                } catch (err) {
-                    updateChatSessions();
-                }
-
-                callback();
+                        window.utils.chatSessionExists(newChatSessionAndFilename.filename).then((value) => {
+                            if (value === true) {
+                                saveChatSession(newChatSessionAndFilename);
+                            } else {
+                                throw Error("File does not exist");
+                            }
+                        });
+                        return newChatSessionAndFilename;
+                    } else return chatSessionAndFilename;
+                });
+                setChatSessionsAndFilenames(newChatSessionsAndFilenames);
+            } catch (err) {
+                updateChatSessions();
             }
         },
         [chatSessionsAndFilenames]
@@ -230,6 +238,101 @@ function App2(): JSX.Element {
         return await window.utils.createChatSessionFile(modelFilePath);
     }, []);
 
+    const getPrompts = useCallback(async () => {
+        return await window.utils.getPrompts();
+    }, []);
+
+    const createPromptFile = useCallback(async (name: string, description: string, prompt: string) => {
+        console.log("Creating prompt file");
+
+        const updatedPromptsAndFilenames: PromptAndFilename[] = await getPrompts();
+        console.log("Updating promptsAndFilenames first");
+
+        const newPromptAndFilename: PromptAndFilename = await window.utils.createPromptFile(name, description, prompt);
+        console.log(`Created new prompt file: ${newPromptAndFilename.filename}`);
+
+        setPromptsAndFilenames([...updatedPromptsAndFilenames, newPromptAndFilename]);
+        console.log("Added newPromptAndFilename to existing PromptsAndFilenames");
+    }, []);
+
+    const renamePrompt = useCallback(
+        (event: React.KeyboardEvent, index: number, itemName: string) => {
+            console.log("Renaming prompt");
+
+            try {
+                const newPromptsAndFilenames = promptsAndFilenames.map((promptAndFilename, i) => {
+                    if (i === index) {
+                        console.log(`Updating prompt of index ${index}`);
+
+                        const newPromptAndFilename: PromptAndFilename = {
+                            ...promptAndFilename,
+                            prompt: {
+                                ...promptAndFilename.prompt,
+                                name: itemName ? itemName : promptAndFilename.prompt.name
+                            }
+                        };
+                        console.log({newPromptAndFilename});
+
+                        window.utils.promptExists(newPromptAndFilename.filename).then((value) => {
+                            if (value === true) {
+                                savePrompt(newPromptAndFilename);
+                            } else {
+                                throw Error("File does not exist");
+                            }
+                        });
+                        return newPromptAndFilename;
+                    } else return promptAndFilename;
+                });
+                setPromptsAndFilenames(newPromptsAndFilenames);
+            } catch (err) {
+                updatePromptsAndFilenames();
+            }
+        },
+        [promptsAndFilenames]
+    );
+
+    const deletePrompt = useCallback(
+        (index: number) => {
+            console.log(`Deleting prompt index ${index}`);
+
+            try {
+                const toDeletePrompt = promptsAndFilenames[index];
+                window.utils.promptExists(toDeletePrompt!.filename).then((value) => {
+                    if (value === true) {
+                        window.utils.deletePrompt(toDeletePrompt!.filename);
+                    } else {
+                        throw Error("File does not exist");
+                    }
+                });
+
+                const newPromptsAndFilenames = promptsAndFilenames.filter((promptAndFilename, i) => i !== index);
+
+                setPromptsAndFilenames(newPromptsAndFilenames);
+                console.log("newPromptsAndFilenames set");
+            } catch (err) {
+                console.error(err);
+                updatePromptsAndFilenames();
+            }
+        },
+        [promptsAndFilenames]
+    );
+
+    const updatePromptsAndFilenames = useCallback(() => {
+        console.log("Updating promptsAndFilenames list");
+
+        window.utils.getPrompts().then((value) => {
+            setPromptsAndFilenames(value);
+        });
+    }, []);
+
+    const savePrompt = useCallback(async (promptAndFilename: PromptAndFilename) => {
+        console.log("Saving prompt");
+        console.log(`Filename: ${promptAndFilename.filename}`);
+        console.log({promptAndFilename});
+
+        await window.utils.savePrompt(promptAndFilename.filename, promptAndFilename.prompt);
+    }, []);
+
     const stopActivePrompt = useCallback(() => {
         void electronLlmRpc.stopActivePrompt();
     }, []);
@@ -300,17 +403,130 @@ function App2(): JSX.Element {
     const loaded = state.chatSession.loaded;
     const showMessage = state.selectedModelFilePath == null || error != null || state.chatSession.simplifiedChat.length === 0;
 
+    // Center
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [inputText, setInputText] = useState<string>("");
+    const autocompleteRef = useRef<HTMLDivElement>(null);
+    const autocompleteCurrentTextRef = useRef<HTMLDivElement>(null);
+    const [isSystemPrompt, setisSystemPrompt] = useState<boolean>(false);
+    const [isShowSystemPrompt, setIsShowSystemPrompt] = useState<boolean>(false);
+
+    const autocompleteText = useMemo(() => {
+        const fullText = (state.chatSession.draftPrompt.prompt ?? "") + (state.chatSession.draftPrompt.completion ?? "");
+        if (fullText.startsWith(inputText)) return fullText.slice(inputText.length);
+        return "";
+    }, [inputText, state.chatSession.draftPrompt.prompt, state.chatSession.draftPrompt.completion]);
+
+    const setInputValue = useCallback((value: string) => {
+        if (inputRef.current != null) inputRef.current.value = value;
+
+        if (autocompleteCurrentTextRef.current != null) autocompleteCurrentTextRef.current.innerText = value;
+
+        setInputText(value);
+    }, []);
+
+    const resizeInput = useCallback(() => {
+        if (inputRef.current == null) return;
+
+        inputRef.current.style.height = "";
+        inputRef.current.style.height = inputRef.current.scrollHeight + "px";
+
+        if (autocompleteRef.current != null) {
+            autocompleteRef.current.scrollTop = inputRef.current.scrollTop;
+        }
+    }, []);
+
+    const submitPrompt = useCallback(() => {
+        if (generatingResult || inputRef.current == null) return;
+
+        const message = inputRef.current.value;
+        if (message.length === 0) return;
+
+        setInputValue("");
+        resizeInput();
+        onPromptInput?.("");
+        setPromptindexDisabled(undefined);
+        sendPrompt(message);
+    }, [setInputValue, generatingResult, resizeInput, sendPrompt, onPromptInput]);
+
+    const onInput = useCallback(() => {
+        setInputText(inputRef.current?.value ?? "");
+        resizeInput();
+
+        if (autocompleteCurrentTextRef.current != null && inputRef.current != null)
+            autocompleteCurrentTextRef.current.innerText = inputRef.current?.value;
+
+        if (inputRef.current != null && onPromptInput != null) onPromptInput(inputRef.current?.value);
+    }, [resizeInput, onPromptInput]);
+
+    const onInputKeyDown = useCallback(
+        (event: React.KeyboardEvent<HTMLInputElement>) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                submitPrompt();
+            } else if (event.key === "Tab" && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                event.preventDefault();
+                if (inputRef.current != null && autocompleteText !== "") {
+                    setInputValue(inputRef.current.value + autocompleteText);
+                    inputRef.current.scrollTop = inputRef.current.scrollHeight;
+                    onPromptInput?.(inputRef.current.value);
+                }
+
+                resizeInput();
+            }
+        },
+        [submitPrompt, setInputValue, onPromptInput, resizeInput, autocompleteText]
+    );
+
+    // Sidebar chat session
+    const [chatSessionindexDisabled, setChatSessionIndexDisabled] = useState<number>();
+    const [promptindexDisabled, setPromptindexDisabled] = useState<number>();
+    const [chatSessionInputValue, setChatSessionInputValue] = useState<string>("");
+    const [promptInputValue, setPromptInputValue] = useState<string>("");
+
+    console.log("Asd");
+
+    // Sidebar prompt
+    const loadPrompt = useCallback((index: number) => {
+        console.log("Loading prompt to input ref");
+
+        if (!inputRef.current?.disabled && promptsAndFilenames) {
+            setInputValue(promptsAndFilenames[index]!.prompt.prompt);
+        } else console.warn("input ref is disabled");
+    }, []);
+
     return (
         <div className="flex flex-row">
-            <Sidebar
-                mainButton="New chat session"
-                mainButtonFunction={unload}
-                items={chatSessionsAndFilenames}
-                OnSelectItem={loadChatSession}
-                renameItem={renameChatSession}
-                deleteItem={deleteChatSession}
-                exportItem={exportFile}
-            >
+            <Sidebar>
+                <SidebarTop setInputValue={setChatSessionInputValue}>
+                    <SidebarTopButton>
+                        <Button
+                            onClick={() => {
+                                setChatSessionIndexDisabled(undefined);
+                                unload();
+                            }}
+                        >
+                            <Plus className="size-icon mr-[5px]" />
+                            <p>New chat session</p>
+                        </Button>
+                    </SidebarTopButton>
+                </SidebarTop>
+                <div className="px-[8px]">
+                    <Separator />
+                </div>
+                <SidebarCenter
+                    items={chatSessionsAndFilenames}
+                    inputValue={chatSessionInputValue}
+                    indexDisabled={chatSessionindexDisabled}
+                    setIndexDisabled={setChatSessionIndexDisabled}
+                    OnSelectItem={loadChatSession}
+                    renameItem={renameChatSession}
+                    deleteItem={deleteChatSession}
+                    exportItem={(index: number) => exportFile("chat session", index)}
+                />
+                <div className="px-[8px]">
+                    <Separator />
+                </div>
                 <SidebarButtonGroup>
                     <SideBarButton display="Clear Conversations" Icon={Trash} />
                     <SideBarButton display="Export Data" Icon={FileExport} />
@@ -327,15 +543,87 @@ function App2(): JSX.Element {
                 error={error}
                 loadMessage={loadMessage}
                 systemPrompt={systemPrompt}
+                isShowSystemPrompt={isShowSystemPrompt}
                 setSystemPrompt={setSystemPrompt}
                 setSelectedModel={setSelectedModel}
                 loadModelAndSession={loadModelAndSession}
-                stopActivePrompt={stopActivePrompt}
-                onPromptInput={onPromptInput}
-                sendPrompt={sendPrompt}
-                saveChatHistory={saveChatHistory}
-            />
-            <Sidebar mainButton="New Prompt" selectItem={(index) => null} />
+                setisSystemPrompt={setisSystemPrompt}
+            >
+                <StatusBar>
+                    {selectedModel !== "" && !loading && loaded ? (
+                        <>
+                            <StatusBarItems display={selectedModel.split("\\").pop()} />{" "}
+                            <StatusBarItems display={`Input Tokens: ${state.chatSession.usedInputTokens}/1000`} separator={false} />
+                            <StatusBarItems display={`Output Tokens: ${state.chatSession.usedOutputTokens}/1000`} separator={false} />
+                        </>
+                    ) : (
+                        <></>
+                    )}
+                </StatusBar>
+                <BottomBar>
+                    <BottomBarInput
+                        disabled={!loaded}
+                        inputRef={inputRef}
+                        inputText={inputText}
+                        autocompleteText={autocompleteText}
+                        generatingResult={generatingResult}
+                        onInput={onInput}
+                        onInputKeyDown={onInputKeyDown}
+                        stopGeneration={generatingResult ? stopActivePrompt : undefined}
+                        submitPrompt={submitPrompt}
+                    />
+                    <QuickSettings>
+                        <Switch
+                            disabled={!isSystemPrompt}
+                            checked={isShowSystemPrompt}
+                            onCheckedChange={() => setIsShowSystemPrompt((value) => !value)}
+                        />
+                        <QuickSettingsItem icon={FileExport} onClick={saveChatHistory} />
+                        <QuickSettingsItem icon={Plus} />
+                        <QuickSettingsItem icon={Plus} />
+                        <QuickSettingsItem icon={Plus} />
+                        <QuickSettingsItem icon={Plus} />
+                    </QuickSettings>
+                </BottomBar>
+            </Center>
+            <Sidebar>
+                <SidebarTop setInputValue={setPromptInputValue}>
+                    <SidebarTopButton>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    onClick={() => {
+                                        setPromptindexDisabled(undefined);
+                                    }}
+                                >
+                                    <Plus className="size-icon mr-[5px]" />
+                                    <p>New prompt</p>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-[40%] p-0 m-0 gap-0">
+                                <CreatePromptDialog
+                                    createPromptFile={(name, description, prompt) => {
+                                        createPromptFile(name, description, prompt);
+                                    }}
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    </SidebarTopButton>
+                </SidebarTop>
+                <div className="px-[8px]">
+                    <Separator />
+                </div>
+                <SidebarCenter
+                    items={promptsAndFilenames}
+                    inputValue={promptInputValue}
+                    indexDisabled={promptindexDisabled}
+                    setIndexDisabled={setPromptindexDisabled}
+                    OnSelectItem={loadPrompt}
+                    renameItem={renamePrompt}
+                    deleteItem={deletePrompt}
+                    exportItem={(index: number) => exportFile("prompt", index)}
+                />
+            </Sidebar>
         </div>
     );
 }
