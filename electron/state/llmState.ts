@@ -98,6 +98,8 @@ const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", "u
 export const llmFunctions = {
     async loadLlama() {
         await withLock(llmFunctions, "llama", async () => {
+            console.log("loading llama");
+
             if (llama != null) {
                 try {
                     console.log("Disposing Llama");
@@ -140,6 +142,8 @@ export const llmFunctions = {
     },
     async loadModel(modelPath: string) {
         await withLock(llmFunctions, "model", async () => {
+            console.log("loading model");
+
             if (llama == null) throw new Error("Llama not loaded");
 
             if (model != null) {
@@ -202,6 +206,8 @@ export const llmFunctions = {
     },
     async createContext() {
         await withLock(llmFunctions, "context", async () => {
+            console.log("Creating context");
+
             if (model == null) throw new Error("Model not loaded");
 
             if (context != null) {
@@ -246,6 +252,8 @@ export const llmFunctions = {
     },
     async createContextSequence() {
         await withLock(llmFunctions, "contextSequence", async () => {
+            console.log("Creating context sequence");
+
             if (context == null) throw new Error("Context not loaded");
 
             try {
@@ -283,6 +291,8 @@ export const llmFunctions = {
     chatSession: {
         async createChatSession() {
             await withLock(llmFunctions, "chatSession", async () => {
+                console.log("Creating chat session");
+
                 if (contextSequence == null) throw new Error("Context sequence not loaded");
 
                 if (chatSession != null) {
