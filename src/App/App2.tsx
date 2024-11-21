@@ -53,6 +53,15 @@ function App2(): JSX.Element {
     useEffect(() => {
         console.log(`generating result ${generatingResult}`);
 
+        if (isSystemPrompt === false && generatingResult) {
+            console.log("Checking if model supports system prompts");
+
+            if (state.chatSession.simplifiedChat[0]?.type === "system") {
+                console.log("model supports system prompts");
+                setisSystemPrompt(true);
+            } else console.warn("model does not support system prompts");
+        }
+
         if (!generatingResult) {
             const newChatSessionsAndFilenames: ChatSessionAndFilename[] = chatSessionsAndFilenames.map((chatSessionAndFilename) => {
                 if (JSON.stringify(chatSessionAndFilename.chatSession) === JSON.stringify(selectedChatSession)) {
@@ -84,6 +93,16 @@ function App2(): JSX.Element {
             setChatSessionsAndFilenames(newChatSessionsAndFilenames);
         }
     }, [generatingResult]);
+
+    useEffect(() => {
+        if (!isDarkMode) {
+            console.log("Switching to light mode");
+            document.querySelector("html")?.classList.remove("dark");
+        } else {
+            console.log("Switching to dark mode");
+            document.querySelector("html")?.classList.add("dark");
+        }
+    }, [isDarkMode]);
 
     const loadChatSession = useCallback(
         async (index: number) => {
@@ -406,8 +425,6 @@ function App2(): JSX.Element {
         },
         [chatSessionsAndFilenames]
     );
-
-    !isDarkMode ? document.querySelector("html")?.classList.remove("dark") : document.querySelector("html")?.classList.add("dark");
 
     const error = state.llama.error ?? state.model.error ?? state.context.error ?? state.contextSequence.error;
     const loading =
