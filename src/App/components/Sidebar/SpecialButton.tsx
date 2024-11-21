@@ -48,8 +48,8 @@ function SpecialButton({item, index, disabled, onClick, renameItem, deleteItem, 
             className={cn(
                 `flex flex-none items-center h-[40px] w-full px-[10px] rounded-[5px] text-cblack dark:text-cwhite bg-foreground-dark
       dark:bg-background-light text-[15px] select-none hover:bg-foreground-dark/60 hover:dark:bg-white/20
-      active:bg-foreground-dark/40 active:dark:bg-white/30 cursor-pointer`,
-                disabled
+      active:bg-foreground-dark/40 active:dark:bg-white/30 cursor-pointer `,
+                disabled && "chatSession" in item
                     ? "bg-primary/20 dark:bg-primary/20 hover:bg-primary/30 hover:dark:bg-primary/30 active:bg-primary/40 active:dark:bg-primary/40"
                     : ""
             )}
@@ -67,7 +67,7 @@ function SpecialButton({item, index, disabled, onClick, renameItem, deleteItem, 
                     autoFocus={true}
                 />
             ) : (
-                <span className={cn("truncate", disabled ? "font-semibold" : "font-normal")}>
+                <span className={cn("truncate", disabled && "chatSession" in item ? "font-semibold" : "font-normal")}>
                     {"chatSession" in item ? item.chatSession.name : item.prompt.name}
                 </span>
             )}
