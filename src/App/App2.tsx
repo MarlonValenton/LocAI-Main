@@ -188,6 +188,10 @@ function App2(): JSX.Element {
                 setChatSessionsAndFilenames(newChatSessionsAndFilenames);
                 console.log("newChatSessionsAndFilenames set");
 
+                if (chatSessionSelectedIndex === index) {
+                    setChatSessionSelectedIndex(undefined);
+                }
+
                 // setSelectedModel("");
                 // console.log("selected model set to empty");
 
@@ -226,6 +230,9 @@ function App2(): JSX.Element {
 
             setChatSessionsAndFilenames([...updatedChatSessionsAndFilenames, newChatSessionAndFilename]);
             console.log("Added newChatSession to existing chatSessions");
+
+            setChatSessionSelectedIndex(updatedChatSessionsAndFilenames.length);
+            console.log("Selected chat session index");
 
             await electronLlmRpc.loadModelAndSession(selectedModel);
             await saveChatSession(newChatSessionAndFilename);
