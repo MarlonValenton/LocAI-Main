@@ -1,7 +1,5 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {HTMLProps, useCallback, useEffect, useState} from "react";
-import {ClassValue} from "class-variance-authority/types";
 import Info from "../../../icons/info-circle.svg?react";
 import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue} from "../../shadcncomponents/select";
 import {Button} from "../../shadcncomponents/Button";
