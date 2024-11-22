@@ -8,12 +8,12 @@ import ChatArea from "../Center/ChatArea/ChatArea";
 import ExtraInformationDialog from "./ExtraInformationDialog";
 
 interface DeleteDialogProps {
-    ChatSessionAndFilename: ChatSessionAndFilename,
+    chatSessionAndFilename: ChatSessionAndFilename,
     children?: JSX.Element,
     deleteItem(): void
 }
 
-export function DeleteChatSessionDialog({ChatSessionAndFilename, children, deleteItem}: DeleteDialogProps) {
+export function DeleteChatSessionDialog({chatSessionAndFilename, children, deleteItem}: DeleteDialogProps) {
     const [isShowSystemPrompt, setIsShowSystemPrompt] = useState<boolean>(false);
 
     return (
@@ -25,29 +25,27 @@ export function DeleteChatSessionDialog({ChatSessionAndFilename, children, delet
                         <DialogTitle>Delete Item</DialogTitle>
                         <DialogDescription>Are you sure you want to delete this item?</DialogDescription>
                     </DialogHeader>
-                    {/* <ExtraInformationDialog
-                        filename={ChatSessionAndFilename.filename}
-                        modelName={ChatSessionAndFilename.chatSession.modelName}
-                        inputTokens={ChatSessionAndFilename.chatSession.inputTokens}
-                        outputTokens={ChatSessionAndFilename.chatSession.outputTokens}
-                    /> */}
                     <ExtraInformationDialog
                         items={[
-                            ["Filename", ChatSessionAndFilename.filename],
-                            ["Path", ChatSessionAndFilename.path],
-                            ["Model Name", ChatSessionAndFilename.chatSession.modelName],
-                            ["Model Path", ChatSessionAndFilename.chatSession.modelPath],
-                            ["Input Tokens", ChatSessionAndFilename.chatSession.inputTokens],
-                            ["Output Tokens", ChatSessionAndFilename.chatSession.outputTokens]
+                            ["Filename", chatSessionAndFilename.filename],
+                            ["Path", chatSessionAndFilename.path],
+                            ["Model Name", chatSessionAndFilename.chatSession.modelName],
+                            ["Model Path", chatSessionAndFilename.chatSession.modelPath],
+                            ["Input Tokens", chatSessionAndFilename.chatSession.inputTokens],
+                            ["Output Tokens", chatSessionAndFilename.chatSession.outputTokens]
                         ]}
                         contentClassName="h-fit max-h-[450px]"
                     />
                     <div className="h-[calc(100vh/2)] overflow-auto">
-                        <ChatArea chatHistory={ChatSessionAndFilename.chatSession.chatHistory} isShowSystemPrompt={isShowSystemPrompt} />
+                        <ChatArea chatHistory={chatSessionAndFilename.chatSession.chatHistory} isShowSystemPrompt={isShowSystemPrompt} />
                     </div>
                     <DialogFooter className="border-border-gray border-t-[1px] px-[15px] py-[10px]">
                         <div className="flex gap-[10px] flex-grow items-center">
-                            <Switch checked={isShowSystemPrompt} onCheckedChange={() => setIsShowSystemPrompt((value) => !value)} />
+                            <Switch
+                                checked={isShowSystemPrompt}
+                                onCheckedChange={() => setIsShowSystemPrompt((value) => !value)}
+                                disabled={chatSessionAndFilename.chatSession.chatHistory![0]?.type !== "system"}
+                            />
                             System prompt visibility
                         </div>
                         <DialogClose asChild>

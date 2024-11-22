@@ -80,7 +80,7 @@ function SpecialButton({item, index, disabled, onClick, editItem, deleteItem, ex
             {!isEditMode ? (
                 <div className="flex flex-1 justify-end items-center">
                     {"chatSession" in item ? (
-                        <DeleteChatSessionDialog deleteItem={() => deleteItem(index)} ChatSessionAndFilename={item}>
+                        <DeleteChatSessionDialog deleteItem={() => deleteItem(index)} chatSessionAndFilename={item}>
                             <DropdownMenu>
                                 <DropdownMenuTrigger className="flex items-center">
                                     <Dots className="text-icon-gray size-[20px]" />
