@@ -611,6 +611,7 @@ function App2(): JSX.Element {
                         inputText={inputText}
                         autocompleteText={autocompleteText}
                         generatingResult={generatingResult}
+                        isDarkMode={isDarkMode}
                         onInput={onInput}
                         onInputKeyDown={onInputKeyDown}
                         stopGeneration={generatingResult ? stopActivePrompt : undefined}

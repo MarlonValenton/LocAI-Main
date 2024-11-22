@@ -20,6 +20,7 @@ interface BottomBarInputProps {
     inputText: string,
     autocompleteText: string,
     generatingResult: boolean,
+    isDarkMode: boolean,
     onInput(): void,
     onInputKeyDown(event: React.KeyboardEvent<HTMLInputElement>): void,
     stopGeneration?(): void,
@@ -32,11 +33,14 @@ function BottomBarInput({
     inputText,
     autocompleteText,
     generatingResult,
+    isDarkMode,
     onInput,
     onInputKeyDown,
     stopGeneration,
     submitPrompt
 }: BottomBarInputProps) {
+    console.log(document.querySelector("html")?.classList.value === "dark");
+
     return (
         <Input
             ref={inputRef}
@@ -45,7 +49,7 @@ function BottomBarInput({
             autoComplete="off"
             spellCheck
             outerClassName="max-w-[900px]"
-            variant={document.querySelector("html")?.classList.value === "dark" ? "solid" : "default"}
+            variant={isDarkMode ? "solid" : "default"}
             autocomplete={inputText + autocompleteText}
             placeholder={inputText + autocompleteText === "" ? "Type a message..." : ""}
             startIcon={
