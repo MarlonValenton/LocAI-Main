@@ -13,6 +13,7 @@ import ChatSessionAndFilename from "../interfaces/ChatSessionAndFilename";
 import {ExportDialogType} from "../interfaces/dialog";
 import LocaiConfig from "../interfaces/locaiconfig";
 import PromptAndFilename from "../interfaces/PromptAndFilename";
+import {ChatSessionValues, PromptValues} from "../interfaces/EditItemValues";
 import Center from "./components/Center/Center";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SideBarButton from "./components/Sidebar/SidebarButton";
@@ -152,9 +153,9 @@ function App2(): JSX.Element {
         [chatSessionsAndFilenames, selectedChatSession]
     );
 
-    const renameChatSession = useCallback(
-        (event: React.KeyboardEvent, index: number, itemName: string) => {
-            console.log("Renaming chat session");
+    const editChatSession = useCallback(
+        (index: number, values: ChatSessionValues) => {
+            console.log("Editing chat session");
 
             try {
                 const newChatSessionsAndFilenames = chatSessionsAndFilenames.map((chatSessionAndFilename, i) => {
@@ -165,7 +166,7 @@ function App2(): JSX.Element {
                             ...chatSessionAndFilename,
                             chatSession: {
                                 ...chatSessionAndFilename.chatSession,
-                                name: itemName ? itemName : chatSessionAndFilename.chatSession.name
+                                name: values.name ? values.name : chatSessionAndFilename.chatSession.name
                             }
                         };
                         console.log({newChatSessionAndFilename});
@@ -285,9 +286,9 @@ function App2(): JSX.Element {
         console.log("Added newPromptAndFilename to existing PromptsAndFilenames");
     }, []);
 
-    const renamePrompt = useCallback(
-        (event: React.KeyboardEvent, index: number, itemName: string) => {
-            console.log("Renaming prompt");
+    const editPrompt = useCallback(
+        (index: number, values: PromptValues) => {
+            console.log("Editing prompt");
 
             try {
                 const newPromptsAndFilenames = promptsAndFilenames.map((promptAndFilename, i) => {
@@ -298,7 +299,9 @@ function App2(): JSX.Element {
                             ...promptAndFilename,
                             prompt: {
                                 ...promptAndFilename.prompt,
-                                name: itemName ? itemName : promptAndFilename.prompt.name
+                                name: values.name ? values.name : promptAndFilename.prompt.name,
+                                description: values.description ? values.description : promptAndFilename.prompt.description,
+                                prompt: values.prompt ? values.prompt : promptAndFilename.prompt.prompt
                             }
                         };
                         console.log({newPromptAndFilename});
@@ -561,7 +564,7 @@ function App2(): JSX.Element {
                     selectedIndex={chatSessionSelectedIndex}
                     setSelectedIndex={setChatSessionSelectedIndex}
                     OnSelectItem={loadChatSession}
-                    renameItem={renameChatSession}
+                    editItem={editChatSession}
                     deleteItem={deleteChatSession}
                     exportItem={(index: number) => exportFile("chat session", index)}
                 />
@@ -660,7 +663,7 @@ function App2(): JSX.Element {
                     selectedIndex={promptSelectedIndex}
                     setSelectedIndex={setPromptSelectedIndex}
                     OnSelectItem={loadPrompt}
-                    renameItem={renamePrompt}
+                    editItem={editPrompt}
                     deleteItem={deletePrompt}
                     exportItem={(index: number) => exportFile("prompt", index)}
                 />

@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import React, {useRef, useState} from "react";
+import {useRef, useState} from "react";
 import {DialogTrigger} from "@radix-ui/react-dialog";
 import Chat from "../../../icons/message.svg?react";
 import Dots from "../../../icons/dots.svg?react";
@@ -12,20 +12,24 @@ import {cn} from "../../../lib/utils";
 import PromptAndFilename from "../../../interfaces/PromptAndFilename";
 import {DeleteChatSessionDialog} from "../Dialogs/DeleteChatSessionDialog";
 import {DeletePromptDialog} from "../Dialogs/DeletePromptDialog";
+import {Dialog} from "../../shadcncomponents/dialog";
+import {EditPromptDialog} from "../Dialogs/EditPromptDialog";
+import {EditItemValues} from "../../../interfaces/EditItemValues";
 
 interface SpecialButtonProps {
     item: ChatSessionAndFilename | PromptAndFilename,
     index: number,
     disabled?: boolean,
     onClick(): void,
-    renameItem(event: React.KeyboardEvent, index: number, itemName: string): void,
+    editItem(index: number, values: EditItemValues): void,
     deleteItem(index: number): void,
     exportItem(): void
 }
 
-function SpecialButton({item, index, disabled, onClick, renameItem, deleteItem, exportItem}: SpecialButtonProps): JSX.Element {
+function SpecialButton({item, index, disabled, onClick, editItem, deleteItem, exportItem}: SpecialButtonProps): JSX.Element {
     const [isEditMode, setIsEditMode] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>("");
+    const [dialogType, setDialogType] = useState<"delete" | "edit">();
     const ref = useRef<HTMLInputElement>(null);
     useClickOutside(ref, () => setIsEditMode(false));
 
@@ -33,16 +37,18 @@ function SpecialButton({item, index, disabled, onClick, renameItem, deleteItem, 
         <div
             onClick={() => (disabled !== undefined ? (!disabled ? onClick() : "") : onClick())}
             onKeyDownCapture={(e) => {
-                if (e.key === "Escape") {
-                    console.log("Escape key entered. Removing input element");
-                    setIsEditMode(false);
-                } else if (e.key === "Tab") {
-                    console.log("Tab key entered. Resetting input element");
-                    e.preventDefault();
-                    setInputValue("chatSession" in item ? item.chatSession.name : item.prompt.name);
-                } else if (e.key === "Enter") {
-                    renameItem(e, index, inputValue);
-                    setIsEditMode(false);
+                if ("chatSession" in item) {
+                    if (e.key === "Escape") {
+                        console.log("Escape key entered. Removing input element");
+                        setIsEditMode(false);
+                    } else if (e.key === "Tab") {
+                        console.log("Tab key entered. Resetting input element");
+                        e.preventDefault();
+                        setInputValue(item.chatSession.name);
+                    } else if (e.key === "Enter") {
+                        editItem(index, {name: inputValue});
+                        setIsEditMode(false);
+                    }
                 }
             }}
             className={cn(
@@ -110,9 +116,9 @@ function SpecialButton({item, index, disabled, onClick, renameItem, deleteItem, 
                             </DropdownMenu>
                         </DeleteChatSessionDialog>
                     ) : (
-                        <DeletePromptDialog prompt={item} deleteItem={() => deleteItem(index)}>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger className="flex items-center">
+                        <Dialog>
+                            <DropdownMenu modal={false}>
+                                <DropdownMenuTrigger className="flex items-center" onClick={(e) => e.stopPropagation()}>
                                     <Dots className="text-icon-gray size-[20px]" />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
@@ -124,16 +130,16 @@ function SpecialButton({item, index, disabled, onClick, renameItem, deleteItem, 
                                     >
                                         Export
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setInputValue(item.prompt.name);
-                                            setIsEditMode(true);
-                                        }}
-                                    >
-                                        Edit
-                                    </DropdownMenuItem>
-                                    <DialogTrigger asChild>
+                                    <DialogTrigger asChild onClick={() => setDialogType("edit")}>
+                                        <DropdownMenuItem
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                            }}
+                                        >
+                                            Edit
+                                        </DropdownMenuItem>
+                                    </DialogTrigger>
+                                    <DialogTrigger asChild onClick={() => setDialogType("delete")}>
                                         <DropdownMenuItem
                                             onClick={(e) => e.stopPropagation()}
                                             className="text-negative font-semibold focus:bg-negative/50 dark:focus:bg-negative/30 focus:text-negative"
@@ -142,8 +148,13 @@ function SpecialButton({item, index, disabled, onClick, renameItem, deleteItem, 
                                         </DropdownMenuItem>
                                     </DialogTrigger>
                                 </DropdownMenuContent>
+                                {dialogType === "edit" ? (
+                                    <EditPromptDialog index={index} prompt={item} editItem={editItem}></EditPromptDialog>
+                                ) : (
+                                    <DeletePromptDialog prompt={item} deleteItem={() => deleteItem(index)} />
+                                )}
                             </DropdownMenu>
-                        </DeletePromptDialog>
+                        </Dialog>
                     )}
                 </div>
             ) : (

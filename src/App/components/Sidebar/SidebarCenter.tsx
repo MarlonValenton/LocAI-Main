@@ -5,6 +5,7 @@ import Empty from "../../../icons/mist-off.svg?react";
 import ChatSessionAndFilename from "../../../interfaces/ChatSessionAndFilename";
 import PromptAndFilename from "../../../interfaces/PromptAndFilename";
 import {cn} from "../../../lib/utils";
+import {EditItemValues} from "../../../interfaces/EditItemValues";
 import SpecialButton from "./SpecialButton";
 
 interface SidebarCenterProps {
@@ -13,7 +14,7 @@ interface SidebarCenterProps {
     selectedIndex?: number,
     setSelectedIndex: React.Dispatch<React.SetStateAction<number | undefined>>,
     OnSelectItem(index: number): void,
-    renameItem(event: React.KeyboardEvent, index: number, itemName: string): void,
+    editItem(index: number, values: EditItemValues): void,
     deleteItem(index: number): void,
     exportItem(index: number): void
 }
@@ -23,7 +24,7 @@ function SidebarCenter({
     selectedIndex,
     setSelectedIndex,
     OnSelectItem,
-    renameItem,
+    editItem,
     deleteItem,
     exportItem
 }: SidebarCenterProps): JSX.Element {
@@ -67,7 +68,7 @@ function SidebarCenter({
                             setSelectedIndex(index);
                             OnSelectItem(index);
                         }}
-                        renameItem={renameItem}
+                        editItem={editItem}
                         deleteItem={deleteItem}
                         exportItem={() => exportItem(index)}
                     />

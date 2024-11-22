@@ -14,15 +14,27 @@ import "./input.css";
 // color labels for items?
 // special button extra info?
 // advanced sidebar search
-// handle export
-// rename functions remove event
+// handle export block
+// switch disabled when creating model
+// remove promptselectedindex
+// fix switch in DeleteChatSessionDialog
+// fix visible chatarea for a split second when deleting
+// rename is* useStates
+
+// potential tests
+// deleting an item that isn't your selected item
+// pressing prompts
+// pressing chat sessions
+// pressing another chat session when it is still loading
+// empty chat session and prompt
+// stopping a generating prompt and making sure that the response is still saved
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-    <React.StrictMode>
-        {/* <App /> */}
-        <App2 />
-    </React.StrictMode>
-    // <App2 />
+    // <React.StrictMode>
+    //     {/* <App /> */}
+    //     <App2 />
+    // </React.StrictMode>
+    <App2 />
 );
 
 // Use contextBridge
