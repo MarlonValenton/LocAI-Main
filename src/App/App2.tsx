@@ -587,6 +587,7 @@ function App2(): JSX.Element {
                 error={error}
                 loadMessage={loadMessage}
                 systemPrompt={systemPrompt}
+                promptsAndFilenames={promptsAndFilenames}
                 isShowSystemPrompt={isShowSystemPrompt}
                 setSystemPrompt={setSystemPrompt}
                 setSelectedModel={setSelectedModel}

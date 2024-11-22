@@ -11,12 +11,14 @@ import {Separator} from "../../shadcncomponents/Separator";
 import {Slider} from "../../shadcncomponents/slider";
 import {Checkbox} from "../../shadcncomponents/checkbox";
 import {cn} from "../../../lib/utils";
+import PromptAndFilename from "../../../interfaces/PromptAndFilename";
 
 interface ModelSettingsProps {
     setSelectedModel: React.Dispatch<React.SetStateAction<string>>,
     setSystemPrompt: React.Dispatch<React.SetStateAction<string>>,
     selectedModel: string,
     systemPrompt?: string,
+    promptsAndFilenames: PromptAndFilename[],
     loadModelAndSession(): Promise<void>
 }
 
@@ -25,13 +27,17 @@ function ModelSettings({
     setSystemPrompt,
     selectedModel,
     systemPrompt,
+    promptsAndFilenames,
     loadModelAndSession
 }: ModelSettingsProps): JSX.Element {
     const [modelFiles, setModelFiles] = useState<string[]>([]);
+    const [preloadPromptPreviewText, setPreloadPromptPreviewText] = useState<string>("");
 
     if (modelFiles.length == 0) {
         window.utils.getModelFiles().then((value) => setModelFiles(value));
     }
+
+    useEffect(() => console.log(preloadPromptPreviewText), [preloadPromptPreviewText]);
 
     return (
         <div className="flex flex-col flex-grow justify-center items-center">
@@ -45,7 +51,7 @@ function ModelSettings({
                 />
                 <LabelAndInput
                     type="textarea"
-                    textAreaOptions={{defaultValue: systemPrompt, className: "h-[90px]"}}
+                    textAreaOptions={{value: systemPrompt, className: "h-[90px]"}}
                     label="System Prompt"
                     infoIcon={true}
                     onValueChange={setSystemPrompt}
@@ -55,14 +61,21 @@ function ModelSettings({
                     label="Preload Prompt"
                     selectOptions={{selectText: "Select Preload prompt"}}
                     infoIcon={true}
-                    onValueChange={() => console.log("preload prompt value change")}
-                    items={[
-                        {item: "User defined prompt", value: "User defined prompt1"},
-                        {item: "User defined prompt", value: "User defined prompt2"},
-                        {item: "User defined prompt", value: "User defined prompt3"}
-                    ]}
+                    onValueChange={(value) => {
+                        const selected = promptsAndFilenames.find((item) => item.filename === value);
+                        setPreloadPromptPreviewText(selected!.prompt.prompt);
+                    }}
+                    items={promptsAndFilenames.map((item) => {
+                        return {item: item.prompt.name, value: item.filename};
+                    })}
                 />
-                <LabelAndInput type="textarea" label="Preload prompt preview" infoIcon={true} />
+                <LabelAndInput
+                    textAreaOptions={{value: preloadPromptPreviewText}}
+                    type="textarea"
+                    label="Preload prompt preview"
+                    infoIcon={true}
+                    onValueChange={(value) => setPreloadPromptPreviewText(value)}
+                />
                 <div className="flex gap-[5px] items-center w-full">
                     <Separator className="flex-1" />
                     <Label className="w-fit text-[15px]">Response Settings</Label>
@@ -120,7 +133,7 @@ interface LabelAndInputProps {
     type: "select" | "textarea" | "input" | "slider",
     infoIcon?: boolean,
     selectOptions?: {selectText?: string},
-    textAreaOptions?: {defaultValue?: string, className?: string},
+    textAreaOptions?: {value?: string, className?: string},
     sliderOptions?: {defaultValue: number, maxValue: number, stepValue: number, setZeroToAuto: boolean},
     inputOptions?: {placeholder: string},
     label: string,
@@ -180,7 +193,7 @@ function LabelAndInput({
                     <SelectTrigger className={cn("h-[35px] ml-[10px]", infoIcon && type === "select" ? "ml-0" : "")}>
                         <SelectValue placeholder={selectOptions?.selectText} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[250px]">
                         <SelectGroup>
                             {items!.map((item, index) => {
                                 return (
@@ -195,7 +208,7 @@ function LabelAndInput({
             ) : type === "textarea" ? (
                 <Textarea
                     className={cn("max-h-[200px] resize-none", textAreaOptions?.className)}
-                    defaultValue={textAreaOptions?.defaultValue}
+                    value={textAreaOptions?.value}
                     onChange={(e) => onValueChange!(e.target.value)}
                 />
             ) : type === "input" ? (

@@ -3,6 +3,7 @@
 import {useEffect} from "react";
 import {LlmState} from "../../../../electron/state/llmState";
 import Error from "../../../icons/exclamation-circle.svg?react";
+import PromptAndFilename from "../../../interfaces/PromptAndFilename";
 import ModelSettings from "./ModelSettings";
 import ChatArea from "./ChatArea/ChatArea";
 import Loading from "./Loading";
@@ -16,6 +17,7 @@ interface CenterProps {
     loadMessage?: string,
     systemPrompt?: string,
     isShowSystemPrompt: boolean,
+    promptsAndFilenames?: PromptAndFilename[],
     children: JSX.Element[],
     setSelectedModel: React.Dispatch<React.SetStateAction<string>>,
     setSystemPrompt: React.Dispatch<React.SetStateAction<string>>,
@@ -33,6 +35,7 @@ function Center({
     loadMessage,
     systemPrompt,
     isShowSystemPrompt,
+    promptsAndFilenames,
     children,
     setSelectedModel,
     setSystemPrompt,
@@ -71,6 +74,7 @@ function Center({
                     loadModelAndSession={loadModelAndSession}
                     selectedModel={selectedModel}
                     systemPrompt={systemPrompt}
+                    promptsAndFilenames={promptsAndFilenames}
                     setSystemPrompt={setSystemPrompt}
                 />
             ) : (
