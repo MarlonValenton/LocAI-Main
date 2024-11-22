@@ -96,7 +96,8 @@ export default {
             fontFamily: {
                 sans: ["var(--font-sans)", ...fontFamily.sans],
                 display: "Roboto",
-                primary: "Public Sans"
+                primary: "Public Sans",
+                code: "Source Code Pro"
             },
             keyframes: {
                 "accordion-down": {
@@ -127,6 +128,9 @@ export default {
                         "--tw-prose-invert-bullets": "hsl(var(--custom-white))"
                     }
                 }
+            },
+            screens: {
+                "3xl": "1800px"
             }
         }
     },

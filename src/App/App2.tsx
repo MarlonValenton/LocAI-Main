@@ -14,6 +14,7 @@ import {ExportDialogType} from "../interfaces/dialog";
 import LocaiConfig from "../interfaces/locaiconfig";
 import PromptAndFilename from "../interfaces/PromptAndFilename";
 import {ChatSessionValues, PromptValues} from "../interfaces/EditItemValues";
+import ModelResponseSettings from "../interfaces/ModelResponseSettings";
 import Center from "./components/Center/Center";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SideBarButton from "./components/Sidebar/SidebarButton";
@@ -29,15 +30,29 @@ import {Switch} from "./shadcncomponents/switch";
 import CreatePromptDialog from "./components/Dialogs/CreatePromptDialog";
 import {Dialog, DialogContent, DialogTrigger} from "./shadcncomponents/dialog";
 
+let settings: ModelResponseSettings;
+window.utils.getConfig().then((value: LocaiConfig) => {
+    settings = {
+        modelName: undefined,
+        systemPrompt: value.systemPrompt,
+        preloadPrompt: value.preloadPrompt,
+        modelLevelFlashAttention: value.modelLevelFlashAttention,
+        responseSettings: {
+            ...value.responseSettings
+        }
+    };
+});
+
 function App2(): JSX.Element {
     const [isDarkMode, setDarkMode] = useState(false);
     const [chatSessionsAndFilenames, setChatSessionsAndFilenames] = useState<ChatSessionAndFilename[]>([]);
     const [promptsAndFilenames, setPromptsAndFilenames] = useState<PromptAndFilename[]>([]);
     const [selectedChatSession, setSelectedChatSession] = useState<ChatSession>();
-    const [selectedModel, setSelectedModel] = useState("");
+    // const [selectedModel, setSelectedModel] = useState("");
     const [loadMessage, setloadMessage] = useState<string>();
-    const [systemPrompt, setSystemPrompt] = useState<string>("");
+    // const [systemPrompt, setSystemPrompt] = useState<string>("");
     const state = useExternalState(llmState);
+    const [modelResponseSettings, setModelResponseSettings] = useState<ModelResponseSettings>(settings);
     const {generatingResult} = state.chatSession;
 
     useEffect(() => {
@@ -47,8 +62,10 @@ function App2(): JSX.Element {
         console.log("Getting prompts from file system");
         getPrompts().then((value) => setPromptsAndFilenames(value));
 
-        console.log("Getting default system prompt");
-        window.utils.getConfig().then((value: LocaiConfig) => setSystemPrompt(value.defaultSystemPrompt));
+        // console.log("Getting model settings from config file");
+        // window.utils.getConfig().then((value: LocaiConfig) => {
+        //     setSystemPrompt(value.systemPrompt);
+        // });
     }, []);
 
     useEffect(() => {
@@ -145,7 +162,13 @@ function App2(): JSX.Element {
                     await electronLlmRpc.loadChatHistory(chatSession!.chatHistory!, chatSession!.inputTokens, chatSession!.outputTokens);
                 }
 
-                setSelectedModel(chatSession!.modelPath);
+                // setSelectedModel(chatSession!.modelPath);
+                setModelResponseSettings((value) => {
+                    return {
+                        ...value,
+                        modelName: chatSession!.modelPath
+                    };
+                });
                 console.log("Selected model set");
             } else console.log("There are no chat sessions available");
             updateChatSessions();
@@ -237,14 +260,14 @@ function App2(): JSX.Element {
     }, []);
 
     const loadModelAndSession = useCallback(async () => {
-        if (selectedModel) {
-            console.log(`Loading ${selectedModel}`);
+        if (modelResponseSettings.modelName) {
+            console.log(`Loading ${modelResponseSettings.modelName}`);
             setloadMessage("Loading model");
 
             const updatedChatSessionsAndFilenames = await getChatSessions();
             console.log("Updating chatSessionsAndFilenames first");
 
-            const newChatSessionAndFilename: ChatSessionAndFilename = await createChatSessionFile(selectedModel);
+            const newChatSessionAndFilename: ChatSessionAndFilename = await createChatSessionFile(modelResponseSettings.modelName);
             console.log(`Created new chat session file: ${newChatSessionAndFilename.filename}`);
 
             setSelectedChatSession(newChatSessionAndFilename.chatSession);
@@ -256,10 +279,10 @@ function App2(): JSX.Element {
             setChatSessionSelectedIndex(updatedChatSessionsAndFilenames.length);
             console.log("Selected chat session index");
 
-            await electronLlmRpc.loadModelAndSession(selectedModel);
+            await electronLlmRpc.loadModelAndSession(modelResponseSettings.modelName);
             await saveChatSession(newChatSessionAndFilename);
         }
-    }, [selectedModel]);
+    }, [modelResponseSettings]);
 
     const getChatSessions = useCallback(async () => {
         return await window.utils.getChatSessions();
@@ -405,7 +428,13 @@ function App2(): JSX.Element {
     const unload = useCallback(async () => {
         console.log("Unloading state");
 
-        setSelectedModel("");
+        // setSelectedModel("");
+        setModelResponseSettings((value) => {
+            return {
+                ...value,
+                modelName: ""
+            };
+        });
         console.log("selected model set to empty");
 
         setSelectedChatSession(undefined);
@@ -580,24 +609,22 @@ function App2(): JSX.Element {
             </Sidebar>
             <Center
                 state={state}
-                selectedModel={selectedModel}
                 loaded={loaded}
                 generatingResult={generatingResult}
                 loading={loading}
                 error={error}
                 loadMessage={loadMessage}
-                systemPrompt={systemPrompt}
                 promptsAndFilenames={promptsAndFilenames}
+                modelResponseSettings={modelResponseSettings}
                 isShowSystemPrompt={isShowSystemPrompt}
-                setSystemPrompt={setSystemPrompt}
-                setSelectedModel={setSelectedModel}
+                setModelResponseSettings={setModelResponseSettings}
                 loadModelAndSession={loadModelAndSession}
                 setisSystemPrompt={setisSystemPrompt}
             >
                 <StatusBar>
-                    {selectedModel !== "" && !loading && loaded ? (
+                    {modelResponseSettings.modelName !== "" && modelResponseSettings.modelName !== undefined && !loading && loaded ? (
                         <>
-                            <StatusBarItems display={selectedModel.split("\\").pop()} />{" "}
+                            <StatusBarItems display={modelResponseSettings.modelName!.split("\\").pop()} />{" "}
                             <StatusBarItems display={`Input Tokens: ${state.chatSession.usedInputTokens}/1000`} separator={false} />
                             <StatusBarItems display={`Output Tokens: ${state.chatSession.usedOutputTokens}/1000`} separator={false} />
                         </>

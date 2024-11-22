@@ -18,7 +18,7 @@ export async function createChatSessionFile(event: IpcMainInvokeEvent, modelPath
         chatHistory: [
             {
                 type: "system",
-                text: configFile.defaultSystemPrompt
+                text: configFile.systemPrompt
             }
         ]
     };

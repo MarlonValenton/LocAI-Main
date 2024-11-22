@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {useCallback, useEffect, useState} from "react";
+import {useState} from "react";
 import Info from "../../../icons/info-circle.svg?react";
 import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue} from "../../shadcncomponents/select";
 import {Button} from "../../shadcncomponents/Button";
@@ -12,70 +12,149 @@ import {Slider} from "../../shadcncomponents/slider";
 import {Checkbox} from "../../shadcncomponents/checkbox";
 import {cn} from "../../../lib/utils";
 import PromptAndFilename from "../../../interfaces/PromptAndFilename";
+import ModelResponseSettings from "../../../interfaces/ModelResponseSettings";
+import InfoTooltip from "../Tooltips/InfoTooltip";
+import {Tooltip, TooltipProvider, TooltipTrigger} from "../../shadcncomponents/tooltip";
 
+let modelFiles: string[];
+window.utils.getModelFiles().then((value) => (modelFiles = value));
 interface ModelSettingsProps {
-    setSelectedModel: React.Dispatch<React.SetStateAction<string>>,
-    setSystemPrompt: React.Dispatch<React.SetStateAction<string>>,
-    selectedModel: string,
-    systemPrompt?: string,
-    promptsAndFilenames: PromptAndFilename[],
+    setModelResponseSettings: React.Dispatch<React.SetStateAction<ModelResponseSettings>>,
+    promptsAndFilenames?: PromptAndFilename[],
+    modelResponseSettings: ModelResponseSettings,
     loadModelAndSession(): Promise<void>
 }
 
 function ModelSettings({
-    setSelectedModel,
-    setSystemPrompt,
-    selectedModel,
-    systemPrompt,
+    setModelResponseSettings,
     promptsAndFilenames,
+    modelResponseSettings,
     loadModelAndSession
 }: ModelSettingsProps): JSX.Element {
-    const [modelFiles, setModelFiles] = useState<string[]>([]);
-    const [preloadPromptPreviewText, setPreloadPromptPreviewText] = useState<string>("");
+    const [modelName, setModelName] = useState<string>(modelResponseSettings.modelName!);
+    const [systemPromptText, setSystemPrompText] = useState<string>(modelResponseSettings.systemPrompt);
+    const [preloadPrompt, setPreloadPrompt] = useState<string>(modelResponseSettings.preloadPrompt!);
+    const [modelLevelFlashAttention, setModelLevelFlashAttention] = useState<boolean>(modelResponseSettings.modelLevelFlashAttention);
+    const [contextSize, setContextSize] = useState<number>(modelResponseSettings.responseSettings.contextSize);
+    const [temperature, setTemperature] = useState<number>(modelResponseSettings.responseSettings.temperature);
+    const [maxTokens, setMaxTokens] = useState<number>(modelResponseSettings.responseSettings.maxTokens);
+    const [responseLevelFlashAttenion, setResponseLevelFlashAttenion] = useState<boolean>(
+        modelResponseSettings.responseSettings.contextLevelFlashAttention
+    );
+    const [minP, setMinP] = useState<number>(modelResponseSettings.responseSettings.minP);
+    const [topP, setTopP] = useState<number>(modelResponseSettings.responseSettings.topP);
+    const [topK, setTopK] = useState<number>(modelResponseSettings.responseSettings.topK);
+    const [seed, setSeed] = useState<number>(modelResponseSettings.responseSettings.seed);
+    const [responsePrefix, setResponsePrefix] = useState<string>(modelResponseSettings.responseSettings.responsePrefix!);
 
-    if (modelFiles.length == 0) {
-        window.utils.getModelFiles().then((value) => setModelFiles(value));
-    }
-
-    useEffect(() => console.log(preloadPromptPreviewText), [preloadPromptPreviewText]);
+    const updateModelResponseSettings = () => {
+        setModelResponseSettings({
+            modelName: modelName,
+            systemPrompt: systemPromptText,
+            preloadPrompt: preloadPrompt,
+            modelLevelFlashAttention: modelLevelFlashAttention,
+            responseSettings: {
+                contextSize: contextSize,
+                temperature: temperature,
+                maxTokens: maxTokens,
+                contextLevelFlashAttention: responseLevelFlashAttenion,
+                minP: minP,
+                topP: topP,
+                topK: topK,
+                seed: seed,
+                responsePrefix: responsePrefix
+            }
+        }),
+        [
+            modelName,
+            systemPromptText,
+            preloadPrompt,
+            modelLevelFlashAttention,
+            contextSize,
+            temperature,
+            maxTokens,
+            responseLevelFlashAttenion,
+            minP,
+            topP,
+            topK,
+            seed,
+            responsePrefix
+        ];
+    };
 
     return (
         <div className="flex flex-col flex-grow justify-center items-center">
-            <div className="flex flex-col w-[700px] min-h-[400px] lg:max-h-[448px] 2xl:max-h-fit border-[1px] border-border-gray rounded-[5px] px-[20px] py-[25px] text-[20px] [&>*:not(:last-child)]:mb-3 overflow-y-auto">
+            <div className="flex flex-col w-[700px] min-h-[400px] lg:max-h-[448px] 2xl:max-h-[610px] 3xl:max-h-fit border-[1px] border-border-gray rounded-[5px] px-[20px] py-[25px] text-[20px] [&>*:not(:last-child)]:mb-3 overflow-y-auto">
                 <LabelAndInput
                     type="select"
-                    label="Model"
-                    selectOptions={{selectText: "Select a model"}}
-                    onValueChange={setSelectedModel}
+                    selectText="Select a model"
+                    onValueChange={setModelName}
                     items={modelFiles.map((item) => ({item: item.split("\\").pop()!, value: item}))}
-                />
+                >
+                    Model
+                </LabelAndInput>
                 <LabelAndInput
                     type="textarea"
-                    textAreaOptions={{value: systemPrompt, className: "h-[90px]"}}
-                    label="System Prompt"
+                    value={systemPromptText}
+                    className="h-[90px]"
                     infoIcon={true}
-                    onValueChange={setSystemPrompt}
-                />
+                    onValueChange={setSystemPrompText}
+                >
+                    System Prompt
+                    <InfoTooltip>
+                        <p>A system prompt is a text that guides the model towards the kind of responses we want it to generate.</p>
+                        <p>
+                            It's recommended to explain to the model how to behave in certain situations you care about, and to tell it to
+                            not make up information if it doesn't know something.
+                        </p>
+                    </InfoTooltip>
+                </LabelAndInput>
                 <LabelAndInput
                     type="select"
-                    label="Preload Prompt"
-                    selectOptions={{selectText: "Select Preload prompt"}}
+                    selectText="Select Preload Prompt"
                     infoIcon={true}
                     onValueChange={(value) => {
-                        const selected = promptsAndFilenames.find((item) => item.filename === value);
-                        setPreloadPromptPreviewText(selected!.prompt.prompt);
+                        const selected = promptsAndFilenames!.find((item) => item.filename === value);
+                        setPreloadPrompt(selected!.prompt.prompt);
                     }}
-                    items={promptsAndFilenames.map((item) => {
+                    items={promptsAndFilenames!.map((item) => {
                         return {item: item.prompt.name, value: item.filename};
                     })}
-                />
+                >
+                    Preload Prompt
+                    <InfoTooltip>
+                        <p>
+                            You can preload a user prompt onto the context sequence state to make the response start being generated sooner
+                            when the final prompt is given.
+                        </p>
+                        <p>
+                            This won't speed up inference if you call the <span className="font-code">.prompt()</span> function immediately
+                            after preloading the prompt, but can greatly improve initial response times if you preload a prompt before the
+                            user gives it.
+                        </p>
+                    </InfoTooltip>
+                </LabelAndInput>
+                <LabelAndInput type="textarea" value={preloadPrompt} infoIcon={false} onValueChange={(value) => setPreloadPrompt(value)}>
+                    Preload Prompt Preview
+                </LabelAndInput>
                 <LabelAndInput
-                    textAreaOptions={{value: preloadPromptPreviewText}}
-                    type="textarea"
-                    label="Preload prompt preview"
+                    type="checkbox"
                     infoIcon={true}
-                    onValueChange={(value) => setPreloadPromptPreviewText(value)}
-                />
+                    value={modelLevelFlashAttention}
+                    onValueChange={(bool) => setModelLevelFlashAttention(bool)}
+                >
+                    Model Level Flash Attention
+                    <InfoTooltip>
+                        <p>
+                            Flash attention is an optimization in the attention mechanism that makes inference faster, more efficient and
+                            uses less memory.
+                        </p>
+                        <p>
+                            The support for flash attention is currently experimental and may not always work as expected. Use with caution.
+                        </p>
+                        <p>This option will be ignored if flash attention is not supported by the model.</p>
+                    </InfoTooltip>
+                </LabelAndInput>
                 <div className="flex gap-[5px] items-center w-full">
                     <Separator className="flex-1" />
                     <Label className="w-fit text-[15px]">Response Settings</Label>
@@ -85,43 +164,167 @@ function ModelSettings({
                     <div className="flex flex-col w-[50%] gap-[10px]">
                         <LabelAndInput
                             type="slider"
-                            sliderOptions={{defaultValue: 4096, maxValue: 8192, stepValue: 1024, setZeroToAuto: true}}
-                            label="Context Size"
+                            value={contextSize}
+                            sliderMaxValue={8192}
+                            stepValue={1024}
+                            setZeroToAuto={true}
                             infoIcon={true}
-                        />
+                            onValueChange={setContextSize}
+                        >
+                            Context Size
+                            <InfoTooltip>
+                                <p>The number of tokens the model can see at once.</p>
+                            </InfoTooltip>
+                        </LabelAndInput>
                         <LabelAndInput
                             type="slider"
-                            sliderOptions={{defaultValue: 0, maxValue: 1, stepValue: 0.1, setZeroToAuto: false}}
-                            label="Temperature"
+                            value={temperature}
+                            sliderMaxValue={1}
+                            stepValue={0.1}
+                            setZeroToAuto={false}
                             infoIcon={true}
-                        />
-                        <LabelAndInput type="input" label="Max tokens" infoIcon={true} />
+                            onValueChange={setTemperature}
+                        >
+                            Temperature
+                            <InfoTooltip>
+                                <p>
+                                    Temperature is a hyperparameter that controls the randomness of the generated text. It affects the
+                                    probability distribution of the model's output tokens.
+                                </p>
+                                <p>
+                                    A higher temperature (e.g., 1.5) makes the output more random and creative, while a lower temperature
+                                    (e.g., 0.5) makes the output more focused, deterministic, and conservative.
+                                </p>
+                                <p>Set to 0 to disable. Disabled by default (set to 0).</p>
+                            </InfoTooltip>
+                        </LabelAndInput>
+                        <LabelAndInput
+                            type="input"
+                            inputType="int"
+                            placeholder="Optional"
+                            value={maxTokens ? maxTokens.toString() : ""}
+                            infoIcon={false}
+                            onValueChange={(num) => setMaxTokens(Math.floor(Number(num)))}
+                        >
+                            Max Tokens
+                        </LabelAndInput>
                         <div className="flex gap-[10px] items-center h-full">
-                            <Checkbox />
-                            <Label className="text-[15px]">Flash Attention</Label>
-                            <Info className="text-icon-gray size-[20px]" />
+                            <LabelAndInput
+                                type="checkbox"
+                                value={responseLevelFlashAttenion}
+                                infoIcon={true}
+                                onValueChange={(bool) => setResponseLevelFlashAttenion(bool)}
+                            >
+                                Response Level Flash Attention
+                                <InfoTooltip>
+                                    <p>
+                                        You can also enable flash attention for an individual context when creating it, but doing that is
+                                        less optimized as the model may get loaded with less GPU layers since it expected the context to use
+                                        much more VRAM than it actually does due to flash attention:
+                                    </p>
+                                </InfoTooltip>
+                            </LabelAndInput>
                         </div>
                     </div>
                     <Separator orientation="vertical" className="h-full flex-none mx-[20px]" />
                     <div className="flex flex-col w-[50%] gap-[10px]">
                         <LabelAndInput
                             type="slider"
-                            sliderOptions={{defaultValue: 0, maxValue: 1, stepValue: 0.1, setZeroToAuto: false}}
-                            label="minP"
+                            value={minP}
+                            sliderMaxValue={1}
+                            inputMaxValue={1}
+                            stepValue={0.1}
+                            setZeroToAuto={false}
                             infoIcon={true}
-                        />
+                            onValueChange={setMinP}
+                            disabled={temperature === 0 ? true : false}
+                        >
+                            minP
+                            <InfoTooltip>
+                                <p>
+                                    From the next token candidates, discard the percentage of tokens with the lowest probability. For
+                                    example, if set to 0.05, 5% of the lowest probability tokens will be discarded. This is useful for
+                                    generating more high-quality results when using a high temperature. Set to a value between 0 and 1 to
+                                    enable.
+                                </p>
+                                <p>Only relevant when temperature is set to a value greater than 0. Disabled by default.</p>
+                            </InfoTooltip>
+                        </LabelAndInput>
                         <LabelAndInput
                             type="slider"
-                            sliderOptions={{defaultValue: 0, maxValue: 1, stepValue: 0.1, setZeroToAuto: false}}
-                            label="topP"
+                            value={topP}
+                            sliderMaxValue={1}
+                            inputMaxValue={1}
+                            stepValue={0.1}
+                            setZeroToAuto={false}
                             infoIcon={true}
-                        />
-                        <LabelAndInput type="input" label="topK" infoIcon={true} />
-                        <LabelAndInput type="input" label="seed" infoIcon={true} />
+                            onValueChange={setTopP}
+                            disabled={temperature === 0 ? true : false}
+                        >
+                            topP
+                            <InfoTooltip>
+                                <p>
+                                    Dynamically selects the smallest set of tokens whose cumulative probability exceeds the threshold P, and
+                                    samples the next token only from this set. A float number between 0 and 1. Set to 1 to disable.
+                                </p>
+                                <p>Only relevant when temperature is set to a value greater than 0.</p>
+                            </InfoTooltip>
+                        </LabelAndInput>
+                        <LabelAndInput
+                            type="input"
+                            inputType="float"
+                            value={topK ? topK.toString() : ""}
+                            infoIcon={true}
+                            onValueChange={(num) => setTopK(Number(num))}
+                            disabled={temperature === 0 ? true : false}
+                        >
+                            topK
+                            <InfoTooltip>
+                                <p>
+                                    Limits the model to consider only the K most likely next tokens for sampling at each step of sequence
+                                    generation. An integer number between 1 and the size of the vocabulary. Set to 0 to disable (which uses
+                                    the full vocabulary).
+                                </p>
+                                <p>Only relevant when temperature is set to a value greater than 0.</p>
+                            </InfoTooltip>
+                        </LabelAndInput>
+                        <LabelAndInput
+                            type="input"
+                            inputType="int"
+                            value={seed ? seed.toString() : ""}
+                            infoIcon={true}
+                            onValueChange={(num) => setSeed(Math.floor(Number(num)))}
+                            disabled={temperature === 0 ? true : false}
+                        >
+                            seed
+                            <InfoTooltip>
+                                <p>Used to control the randomness of the generated text.</p>
+                                <p>Change the seed to get different results.</p>
+                                <p>Only relevant when using temperature.</p>
+                            </InfoTooltip>
+                        </LabelAndInput>
                     </div>
                 </div>
+                <LabelAndInput type="textarea" value={responsePrefix} infoIcon={true} onValueChange={setResponsePrefix}>
+                    Response Prefix
+                    <InfoTooltip>
+                        <p>
+                            Force a given text prefix to be the start of the model response, to make the model follow a certain direction.
+                        </p>
+                        <p>
+                            May cause some models to not use the given functions in some scenarios where they would have been used
+                            otherwise, so avoid using it together with function calling if you notice unexpected behavior.
+                        </p>
+                    </InfoTooltip>
+                </LabelAndInput>
 
-                <Button onClick={() => loadModelAndSession()} disabled={selectedModel === ""}>
+                <Button
+                    onClick={() => {
+                        updateModelResponseSettings();
+                        loadModelAndSession();
+                    }}
+                    disabled={modelName === "" || modelName === undefined}
+                >
                     Load Model
                 </Button>
             </div>
@@ -129,73 +332,105 @@ function ModelSettings({
     );
 }
 
-interface LabelAndInputProps {
-    type: "select" | "textarea" | "input" | "slider",
+type LabelAndSelectProps = {
+    type: "select",
+    children?: string | [string, JSX.Element?],
     infoIcon?: boolean,
-    selectOptions?: {selectText?: string},
-    textAreaOptions?: {value?: string, className?: string},
-    sliderOptions?: {defaultValue: number, maxValue: number, stepValue: number, setZeroToAuto: boolean},
-    inputOptions?: {placeholder: string},
-    label: string,
+    selectText: string,
     items?: {item: string, value: string}[],
     onValueChange?: React.Dispatch<React.SetStateAction<string>>
-}
-function LabelAndInput({
-    type,
-    infoIcon,
-    label,
-    selectOptions,
-    textAreaOptions,
-    sliderOptions,
-    inputOptions,
-    items,
-    onValueChange
-}: LabelAndInputProps) {
-    const [sliderValue, setSliderValue] = useState<number>(0);
+};
 
-    const onInputKeyDown = useCallback(
-        (e: React.KeyboardEvent<HTMLInputElement>) => {
-            e.preventDefault();
+type LabelAndTextAreaProps = {
+    type: "textarea",
+    children?: string | [string, JSX.Element?],
+    infoIcon?: boolean,
+    value: string,
+    className?: string,
+    onValueChange?: React.Dispatch<React.SetStateAction<string>>
+};
 
-            if (e.key === "ArrowUp") {
-                if (sliderOptions!.maxValue <= 1) {
-                    setSliderValue((value) => Number((value + 0.1).toFixed(1)));
-                } else setSliderValue((value) => value + 1);
-            } else if (e.key === "ArrowDown" && sliderValue > 0) {
-                if (sliderOptions!.maxValue <= 1) {
-                    setSliderValue((value) => Number((value - 0.1).toFixed(1)));
-                } else setSliderValue((value) => value - 1);
-            } else if (e.key === "Backspace") {
-                setSliderValue((value) => Number(value.toString().slice(0, -1)));
-            }
+type LavelAndPrimitiveInputProps = {
+    type: "input",
+    inputType?: "int" | "float" | "string",
+    children?: string | [string, JSX.Element?],
+    infoIcon?: boolean,
+    value: string,
+    placeholder?: string,
+    disabled?: boolean,
+    onValueChange?: React.Dispatch<React.SetStateAction<string>>
+};
 
-            if ("0123456789".includes(e.key) && sliderOptions!.stepValue <= 1) {
-                setSliderValue((value) => Number(value.toString() + e.key));
-            }
-        },
-        [sliderValue]
-    );
+type LabelAndSliderProps = {
+    type: "slider",
+    children?: string | [string, JSX.Element?],
+    infoIcon?: boolean,
+    value: number,
+    sliderMaxValue: number,
+    inputMaxValue?: number,
+    stepValue: number,
+    setZeroToAuto: boolean,
+    disabled?: boolean,
+    onValueChange?: React.Dispatch<React.SetStateAction<number>>
+};
 
-    useEffect(() => {
-        if (type === "slider" && sliderOptions) {
-            setSliderValue(sliderOptions!.defaultValue);
-        }
-    }, []);
+type LabelAndCheckboxProps = {
+    type: "checkbox",
+    children?: string | [string, JSX.Element?],
+    infoIcon?: boolean,
+    value: boolean,
+    onValueChange?: React.Dispatch<React.SetStateAction<boolean>>
+};
 
+type LabelAndInputProps =
+    | LabelAndSelectProps
+    | LabelAndTextAreaProps
+    | LavelAndPrimitiveInputProps
+    | LabelAndSliderProps
+    | LabelAndCheckboxProps;
+
+function LabelAndInput(labelAndInput: LabelAndInputProps) {
     return (
-        <div className={cn("flex items-center flex-row", type === "slider" ? "flex-col" : type === "textarea" ? "items-start" : "")}>
-            <span className={cn("flex flex-none items-center", type === "slider" ? "w-full" : "w-fit")}>
-                <Label className="text-[15px] whitespace-nowrap">{label}</Label>
-                {infoIcon ? <Info className="text-icon-gray size-[20px] mx-[5px]" /> : ""}
+        <div
+            className={cn(
+                "flex items-center flex-row",
+                labelAndInput.type === "slider" ? "flex-col" : labelAndInput.type === "textarea" ? "items-start" : ""
+            )}
+        >
+            <span className={cn("flex flex-none items-center", labelAndInput.type === "slider" ? "w-full" : "w-fit")}>
+                {labelAndInput.type === "checkbox" ? (
+                    <Checkbox
+                        checked={labelAndInput.value}
+                        onCheckedChange={(bool) => labelAndInput.onValueChange!(Boolean(bool))}
+                        className="mr-[10px]"
+                    />
+                ) : (
+                    ""
+                )}
+                <Label className="text-[15px] whitespace-nowrap">
+                    {labelAndInput.children?.length === 2 ? labelAndInput.children![0] : labelAndInput.children}
+                </Label>
+                {labelAndInput.infoIcon ? (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger className="cursor-default">
+                                <Info className="text-icon-gray size-[20px] mx-[5px]" />
+                            </TooltipTrigger>
+                            {labelAndInput.children![1]}
+                        </Tooltip>
+                    </TooltipProvider>
+                ) : (
+                    ""
+                )}
             </span>
-            {type === "select" ? (
-                <Select onValueChange={onValueChange}>
-                    <SelectTrigger className={cn("h-[35px] ml-[10px]", infoIcon && type === "select" ? "ml-0" : "")}>
-                        <SelectValue placeholder={selectOptions?.selectText} />
+            {labelAndInput.type === "select" ? (
+                <Select onValueChange={labelAndInput.onValueChange}>
+                    <SelectTrigger className={cn("h-[35px] ml-[10px]", labelAndInput.infoIcon ? "ml-0" : "")}>
+                        <SelectValue placeholder={labelAndInput.selectText} />
                     </SelectTrigger>
                     <SelectContent className="max-h-[250px]">
                         <SelectGroup>
-                            {items!.map((item, index) => {
+                            {labelAndInput.items!.map((item, index) => {
                                 return (
                                     <SelectItem value={item.value} key={index}>
                                         {item.item}
@@ -205,31 +440,46 @@ function LabelAndInput({
                         </SelectGroup>
                     </SelectContent>
                 </Select>
-            ) : type === "textarea" ? (
+            ) : labelAndInput.type === "textarea" ? (
                 <Textarea
-                    className={cn("max-h-[200px] resize-none", textAreaOptions?.className)}
-                    value={textAreaOptions?.value}
-                    onChange={(e) => onValueChange!(e.target.value)}
+                    className={cn("max-h-[200px] resize-none", labelAndInput.className, !labelAndInput.infoIcon ? "ml-[10px]" : "")}
+                    value={labelAndInput.value}
+                    onChange={(e) => {
+                        labelAndInput.onValueChange!(e.target.value);
+                    }}
                 />
-            ) : type === "input" ? (
-                <Input outerClassName="h-fit" className="h-[30px]" placeholder={inputOptions?.placeholder} />
-            ) : type === "slider" && sliderOptions ? (
+            ) : labelAndInput.type === "input" ? (
+                <Input
+                    outerClassName={cn("h-fit", !labelAndInput.infoIcon ? "ml-[10px]" : "")}
+                    className="h-[30px]"
+                    value={labelAndInput.value}
+                    onChange={(e) => labelAndInput.onValueChange!(e.target.value)}
+                    placeholder={labelAndInput.placeholder ? labelAndInput.placeholder : ""}
+                    type={labelAndInput.inputType === "float" || labelAndInput.inputType === "int" ? "number" : "text"}
+                    step={labelAndInput.inputType === "int" ? 1 : labelAndInput.inputType === "float" ? 0.1 : ""}
+                    min={labelAndInput.inputType === "float" || labelAndInput.inputType === "int" ? "0" : ""}
+                    disabled={labelAndInput.disabled ? labelAndInput.disabled : false}
+                />
+            ) : labelAndInput.type === "slider" ? (
                 <div className="flex gap-[10px] w-full items-center">
                     <Slider
-                        defaultValue={[sliderOptions.defaultValue]}
-                        value={[sliderValue]}
-                        max={sliderOptions.maxValue}
-                        onValueChange={(e) => setSliderValue(e.pop()!)}
-                        step={sliderOptions.stepValue}
-                        className="my-[0px]"
+                        value={[labelAndInput.value]}
+                        max={labelAndInput.sliderMaxValue}
+                        onValueChange={(e) => labelAndInput.onValueChange!(e.pop()!)}
+                        step={labelAndInput.stepValue}
+                        disabled={labelAndInput.disabled ? labelAndInput.disabled : false}
                     />
                     <Input
-                        onKeyDownCapture={onInputKeyDown}
-                        onInput={(e) => console.log(e.currentTarget.value)}
+                        onChange={(e) => labelAndInput.onValueChange!(Number(e.target.value))}
                         outerClassName="w-[100px] h-fit"
                         className="h-[30px]"
-                        value={sliderValue === 0 && sliderOptions.setZeroToAuto ? "Auto" : sliderValue}
-                        // onChange={(e) => console.log(e.target.value)}
+                        value={labelAndInput.value === 0 && labelAndInput.setZeroToAuto ? "" : labelAndInput.value}
+                        placeholder={labelAndInput.value === 0 && labelAndInput.setZeroToAuto ? "Auto" : ""}
+                        type="number"
+                        min="0"
+                        step={labelAndInput.stepValue <= 1 ? 0.1 : 1}
+                        max={labelAndInput.inputMaxValue ? labelAndInput.inputMaxValue : "none"}
+                        disabled={labelAndInput.disabled ? labelAndInput.disabled : false}
                     />
                 </div>
             ) : (

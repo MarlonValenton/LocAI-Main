@@ -4,42 +4,39 @@ import {useEffect} from "react";
 import {LlmState} from "../../../../electron/state/llmState";
 import Error from "../../../icons/exclamation-circle.svg?react";
 import PromptAndFilename from "../../../interfaces/PromptAndFilename";
+import ModelResponseSettings from "../../../interfaces/ModelResponseSettings";
 import ModelSettings from "./ModelSettings";
 import ChatArea from "./ChatArea/ChatArea";
 import Loading from "./Loading";
 interface CenterProps {
     state: LlmState,
-    selectedModel: string,
     loaded: boolean,
     generatingResult: boolean,
     loading: boolean,
     error?: string,
     loadMessage?: string,
-    systemPrompt?: string,
     isShowSystemPrompt: boolean,
     promptsAndFilenames?: PromptAndFilename[],
+    modelResponseSettings: ModelResponseSettings,
     children: JSX.Element[],
-    setSelectedModel: React.Dispatch<React.SetStateAction<string>>,
-    setSystemPrompt: React.Dispatch<React.SetStateAction<string>>,
     setisSystemPrompt: React.Dispatch<React.SetStateAction<boolean>>,
+    setModelResponseSettings: React.Dispatch<React.SetStateAction<ModelResponseSettings>>,
     loadModelAndSession(): Promise<void>
 }
 
 function Center({
     state,
-    selectedModel,
     loaded,
     generatingResult,
     loading,
     error,
     loadMessage,
-    systemPrompt,
     isShowSystemPrompt,
     promptsAndFilenames,
+    modelResponseSettings,
     children,
-    setSelectedModel,
-    setSystemPrompt,
     setisSystemPrompt,
+    setModelResponseSettings,
     loadModelAndSession
 }: CenterProps): JSX.Element {
     useEffect(() => {
@@ -70,12 +67,10 @@ function Center({
                 <Loading progress={state.model.loadProgress}>{loadMessage}</Loading>
             ) : !loaded ? (
                 <ModelSettings
-                    setSelectedModel={setSelectedModel}
                     loadModelAndSession={loadModelAndSession}
-                    selectedModel={selectedModel}
-                    systemPrompt={systemPrompt}
                     promptsAndFilenames={promptsAndFilenames}
-                    setSystemPrompt={setSystemPrompt}
+                    modelResponseSettings={modelResponseSettings}
+                    setModelResponseSettings={setModelResponseSettings}
                 />
             ) : (
                 <ChatArea

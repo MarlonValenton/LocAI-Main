@@ -20,6 +20,7 @@ import "./input.css";
 // fix switch in DeleteChatSessionDialog
 // fix visible chatarea for a split second when deleting
 // rename is* useStates
+// model settings slider inputs not scrolling when too long
 
 // potential tests
 // deleting an item that isn't your selected item
