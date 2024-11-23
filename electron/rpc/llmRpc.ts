@@ -4,6 +4,7 @@ import {BrowserWindow, dialog} from "electron";
 import {ChatHistoryItem} from "node-llama-cpp";
 import {createElectronSideBirpc} from "../utils/createElectronSideBirpc.ts";
 import {llmFunctions, llmState} from "../state/llmState.ts";
+import ModelResponseSettings from "../../src/interfaces/ModelResponseSettings.ts";
 import type {RenderedFunctions} from "../../src/rpc/llmRpc.ts";
 
 const modelDirectoryPath = path.join(process.cwd(), "models");
@@ -45,25 +46,28 @@ export class ElectronLlmRpc {
                 await llmFunctions.chatSession.createChatSession();
             }
         },
-        async loadModelAndSession(modelFilePath: string) {
-            llmState.state.selectedModelFilePath = modelFilePath;
+        async loadModelAndSession(modelResponseSettings: ModelResponseSettings) {
+            llmState.state.selectedModelFilePath = modelResponseSettings.modelName;
 
             if (!llmState.state.llama.loaded) await llmFunctions.loadLlama();
 
-            await llmFunctions.loadModel(modelFilePath);
-            await llmFunctions.createContext();
+            await llmFunctions.loadModel(modelResponseSettings.modelName!, modelResponseSettings.modelLevelFlashAttention);
+            await llmFunctions.createContext(
+                modelResponseSettings.contextSize === 0 ? "auto" : modelResponseSettings.contextSize,
+                modelResponseSettings.contextLevelFlashAttention
+            );
             await llmFunctions.createContextSequence();
-            await llmFunctions.chatSession.createChatSession();
+            await llmFunctions.chatSession.createChatSession(modelResponseSettings.systemPrompt);
         },
-        async loadModel(modelFilePath: string) {
+        async loadModel(modelFilePath: string, modelLevelFlashAttention: boolean) {
             llmState.state.selectedModelFilePath = modelFilePath;
 
             if (!llmState.state.llama.loaded) await llmFunctions.loadLlama();
 
-            await llmFunctions.loadModel(modelFilePath);
+            await llmFunctions.loadModel(modelFilePath, modelLevelFlashAttention);
         },
-        async createContext() {
-            await llmFunctions.createContext();
+        async createContext(contextSize: number | "auto", contextLevelFlashAttention: boolean) {
+            await llmFunctions.createContext(contextSize, contextLevelFlashAttention);
         },
         async createContextSequence() {
             await llmFunctions.createContextSequence();
@@ -71,8 +75,8 @@ export class ElectronLlmRpc {
         async createChatSession() {
             await llmFunctions.chatSession.createChatSession();
         },
-        async loadChatHistory(chatHistory: ChatHistoryItem[], inputTokens: number, outputTokens: number) {
-            await llmFunctions.chatSession.loadChatHistory(chatHistory, inputTokens, outputTokens);
+        async loadChatHistory(chatHistory: ChatHistoryItem[], inputTokens: number, outputTokens: number, systemPrompt: string) {
+            await llmFunctions.chatSession.loadChatHistory(chatHistory, inputTokens, outputTokens, systemPrompt);
         },
         async unload() {
             await llmFunctions.unload();

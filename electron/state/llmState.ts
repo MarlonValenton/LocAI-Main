@@ -14,6 +14,7 @@ import {
 import {withLock, State} from "lifecycle-utils";
 import packageJson from "../../package.json";
 import LocaiConfig from "../../src/interfaces/locaiconfig";
+import ResponseSettings from "../../src/interfaces/ResponseSettings";
 
 export const llmState = new State<LlmState>({
     appVersion: packageJson.version,
@@ -140,9 +141,11 @@ export const llmFunctions = {
             }
         });
     },
-    async loadModel(modelPath: string) {
+    async loadModel(modelPath: string, modelLevelFlashAttention: boolean) {
         await withLock(llmFunctions, "model", async () => {
             console.log("loading model");
+            console.log(`modelPath: ${modelPath}`);
+            console.log(`modelLevelFlashAttention: ${modelLevelFlashAttention}`);
 
             if (llama == null) throw new Error("Llama not loaded");
 
@@ -175,7 +178,8 @@ export const llmFunctions = {
                                 loadProgress
                             }
                         };
-                    }
+                    },
+                    defaultContextFlashAttention: modelLevelFlashAttention
                 });
                 llmState.state = {
                     ...llmState.state,
@@ -204,9 +208,11 @@ export const llmFunctions = {
             }
         });
     },
-    async createContext() {
+    async createContext(contextSize: number | "auto", contextLevelFlashAttention: boolean) {
         await withLock(llmFunctions, "context", async () => {
             console.log("Creating context");
+            console.log(`contextSize: ${contextSize}`);
+            console.log(`contextLevelFlashAttention: ${contextLevelFlashAttention}`);
 
             if (model == null) throw new Error("Model not loaded");
 
@@ -226,7 +232,7 @@ export const llmFunctions = {
                     context: {loaded: false}
                 };
 
-                context = await model.createContext({contextSize: 2048});
+                context = await model.createContext({contextSize: contextSize, flashAttention: contextLevelFlashAttention});
                 llmState.state = {
                     ...llmState.state,
                     context: {loaded: true}
@@ -289,9 +295,14 @@ export const llmFunctions = {
         });
     },
     chatSession: {
-        async createChatSession() {
+        async createChatSession(systemPrompt: string) {
             await withLock(llmFunctions, "chatSession", async () => {
                 console.log("Creating chat session");
+
+                if (systemPrompt) {
+                    console.log("systemPrompt: ");
+                    console.log(systemPrompt);
+                } else console.log("systemPrompt is empty");
 
                 if (contextSequence == null) throw new Error("Context sequence not loaded");
 
@@ -319,7 +330,7 @@ export const llmFunctions = {
                         }
                     };
 
-                    llmFunctions.chatSession.resetChatHistory(false);
+                    llmFunctions.chatSession.resetChatHistory(false, systemPrompt);
 
                     try {
                         await chatSession?.preloadPrompt("", {
@@ -355,8 +366,13 @@ export const llmFunctions = {
                 }
             });
         },
-        async prompt(message: string) {
+        async prompt(message: string, responseSettings: ResponseSettings) {
             await withLock(llmFunctions, "chatSession", async () => {
+                console.log("Starting prompt");
+                console.log(`message: ${message}`);
+                console.log("responseSettings:");
+                console.log(responseSettings);
+
                 if (chatSession == null) throw new Error("Chat session not loaded");
 
                 llmState.state = {
@@ -394,7 +410,13 @@ export const llmFunctions = {
                                 usedOutputTokens: contextSequence?.tokenMeter.usedOutputTokens
                             }
                         };
-                    }
+                    },
+                    maxTokens: responseSettings.maxTokens,
+                    temperature: responseSettings.temperature,
+                    minP: responseSettings.minP,
+                    topK: responseSettings.topK,
+                    topP: responseSettings.topP,
+                    seed: responseSettings.seed
                 });
                 llmState.state = {
                     ...llmState.state,
@@ -415,14 +437,21 @@ export const llmFunctions = {
         stopActivePrompt() {
             promptAbortController?.abort();
         },
-        resetChatHistory(markAsLoaded: boolean = true) {
+        resetChatHistory(markAsLoaded: boolean = true, systemPrompt: string) {
             if (contextSequence == null) return;
 
-            console.log("Disposing chat session in reset");
+            console.log("Resetting chat history");
+
+            if (systemPrompt) {
+                console.log("systemPrompt: ");
+                console.log(systemPrompt);
+            } else console.log("systemPrompt is empty");
+
             chatSession?.dispose();
             chatSession = new LlamaChatSession({
                 contextSequence,
-                autoDisposeSequence: false
+                autoDisposeSequence: false,
+                systemPrompt: systemPrompt
             });
             chatSessionCompletionEngine = chatSession.createPromptCompletionEngine({
                 onGeneration(prompt, completion) {
@@ -503,8 +532,17 @@ export const llmFunctions = {
 
             await fs.writeFile(path.join(configFile.chatSessionsDirectory, filename), JSON.stringify(chatSessionJson), "utf-8");
         },
-        async loadChatHistory(chatHistory: ChatHistoryItem[], inputTokens: number, outputTokens: number) {
+        async loadChatHistory(chatHistory: ChatHistoryItem[], inputTokens: number, outputTokens: number, systemPrompt: string) {
             await withLock(llmFunctions, "chatSession", async () => {
+                console.log("Loading chat history");
+                console.log(`inputTokens: ${inputTokens}`);
+                console.log(`outputTokens: ${outputTokens}`);
+
+                if (systemPrompt) {
+                    console.log("systemPrompt: ");
+                    console.log(systemPrompt);
+                } else console.log("systemPrompt is empty");
+
                 if (contextSequence == null) throw new Error("Context sequence not loaded");
 
                 if (chatSession != null) {
@@ -532,7 +570,7 @@ export const llmFunctions = {
                         }
                     };
 
-                    llmFunctions.chatSession.resetChatHistory(false);
+                    llmFunctions.chatSession.resetChatHistory(false, systemPrompt);
 
                     chatSession?.setChatHistory(chatHistory);
 

@@ -3,17 +3,15 @@
     "chatSessionsDirectory": "chat_sessions",
     "promptsDirectory": "prompts",
     "systemPrompt": "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. If a question does not make any sense, or is not factually coherent, explain why instead of answering something incorrectly. If you don't know the answer to a question, don't share false information.",
-    "preloadPrompt": "give me lorem ipsum text",
     "modelLevelFlashAttention": true,
+    "contextLevelFlashAttention": false,
+    "contextSize": 4096,
     "responseSettings": {
-        "contextSize": 1111,
         "temperature": 0.4,
         "maxTokens": 10000,
-        "contextLevelFlashAttention": false,
         "minP": 0.2,
         "topP": 0.1,
         "topK": 0.7,
-        "seed": 1,
-        "responsePrefix": "asdaddddda"
+        "seed": 1
     }
 }

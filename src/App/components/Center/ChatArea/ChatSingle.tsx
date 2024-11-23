@@ -14,16 +14,16 @@ import {cn} from "../../../../lib/utils";
 type ChatSingleProps = {
     type: string,
     index: number,
-    children: string
+    children: string,
+    isDarkMode: boolean
 };
 
-function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
+function ChatSingle({children, type = "user", index = 0, isDarkMode}: ChatSingleProps) {
     const [isCopyClicked, setIsCopyClicked] = useState<boolean>(false);
-    const isDark = document.querySelector("html")?.classList.contains("dark");
 
     return (
         <div className={cn("w-full bg-foreground py-[20px] px-[10%]", index % 2 === 0 ? "bg-foreground" : "bg-transparent")}>
-            <div className="flex w-full">
+            <div className="flex">
                 <div className="text-primary h-full mr-[30px]">
                     {type === "user" ? (
                         <User className="size-[30px]" />
@@ -34,7 +34,7 @@ function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
                     )}
                 </div>
                 <Markdown
-                    className="prose dark:prose-invert max-w-full"
+                    className="prose dark:prose-invert flex-grow max-w-none w-0"
                     components={{
                         code(props) {
                             const {children, className, ...rest} = props;
@@ -44,12 +44,13 @@ function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
                                     <SyntaxHighlighter
                                         children={String(children).replace(/\n$/, "")}
                                         language={match[1]}
-                                        style={isDark ? nightOwl : defaultStyle}
+                                        style={isDarkMode ? nightOwl : defaultStyle}
                                         customStyle={{
                                             backgroundColor: "transparent",
                                             margin: "0px",
                                             padding: "0px",
-                                            fontSize: "unset"
+                                            fontSize: "unset",
+                                            width: "100%"
                                         }}
                                     />
                                     <button
@@ -65,9 +66,9 @@ function ChatSingle({children, type = "user", index = 0}: ChatSingleProps) {
                                         }}
                                     >
                                         {isCopyClicked ? (
-                                            <Check className="size-[25px] p-[5px] rounded-[5px] hover:bg-foreground dark:hover:bg-background-light" />
+                                            <Check className="size-[30px] p-[5px] rounded-[5px] hover:bg-foreground dark:hover:bg-background-light" />
                                         ) : (
-                                            <Copy className="size-[25px] p-[5px] rounded-[5px] hover:bg-foreground dark:hover:bg-background-light" />
+                                            <Copy className="size-[30px] p-[5px] rounded-[5px] hover:bg-foreground dark:hover:bg-background-light" />
                                         )}
                                     </button>
                                 </div>

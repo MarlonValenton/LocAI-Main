@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Info from "../../../icons/info-circle.svg?react";
 import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue} from "../../shadcncomponents/select";
 import {Button} from "../../shadcncomponents/Button";
@@ -11,7 +11,6 @@ import {Separator} from "../../shadcncomponents/Separator";
 import {Slider} from "../../shadcncomponents/slider";
 import {Checkbox} from "../../shadcncomponents/checkbox";
 import {cn} from "../../../lib/utils";
-import PromptAndFilename from "../../../interfaces/PromptAndFilename";
 import ModelResponseSettings from "../../../interfaces/ModelResponseSettings";
 import InfoTooltip from "../Tooltips/InfoTooltip";
 import {Tooltip, TooltipProvider, TooltipTrigger} from "../../shadcncomponents/tooltip";
@@ -20,67 +19,52 @@ let modelFiles: string[];
 window.utils.getModelFiles().then((value) => (modelFiles = value));
 interface ModelSettingsProps {
     setModelResponseSettings: React.Dispatch<React.SetStateAction<ModelResponseSettings>>,
-    promptsAndFilenames?: PromptAndFilename[],
     modelResponseSettings: ModelResponseSettings,
     loadModelAndSession(): Promise<void>
 }
 
-function ModelSettings({
-    setModelResponseSettings,
-    promptsAndFilenames,
-    modelResponseSettings,
-    loadModelAndSession
-}: ModelSettingsProps): JSX.Element {
+function ModelSettings({setModelResponseSettings, modelResponseSettings, loadModelAndSession}: ModelSettingsProps): JSX.Element {
     const [modelName, setModelName] = useState<string>(modelResponseSettings.modelName!);
     const [systemPromptText, setSystemPrompText] = useState<string>(modelResponseSettings.systemPrompt);
-    const [preloadPrompt, setPreloadPrompt] = useState<string>(modelResponseSettings.preloadPrompt!);
     const [modelLevelFlashAttention, setModelLevelFlashAttention] = useState<boolean>(modelResponseSettings.modelLevelFlashAttention);
-    const [contextSize, setContextSize] = useState<number>(modelResponseSettings.responseSettings.contextSize);
+    const [contextSize, setContextSize] = useState<number | "auto">(modelResponseSettings.contextSize);
     const [temperature, setTemperature] = useState<number>(modelResponseSettings.responseSettings.temperature);
     const [maxTokens, setMaxTokens] = useState<number>(modelResponseSettings.responseSettings.maxTokens);
-    const [responseLevelFlashAttenion, setResponseLevelFlashAttenion] = useState<boolean>(
-        modelResponseSettings.responseSettings.contextLevelFlashAttention
-    );
+    const [contextLevelFlashAttenion, setContextLevelFlashAttenion] = useState<boolean>(modelResponseSettings.contextLevelFlashAttention);
     const [minP, setMinP] = useState<number>(modelResponseSettings.responseSettings.minP);
     const [topP, setTopP] = useState<number>(modelResponseSettings.responseSettings.topP);
     const [topK, setTopK] = useState<number>(modelResponseSettings.responseSettings.topK);
     const [seed, setSeed] = useState<number>(modelResponseSettings.responseSettings.seed);
-    const [responsePrefix, setResponsePrefix] = useState<string>(modelResponseSettings.responseSettings.responsePrefix!);
 
-    const updateModelResponseSettings = () => {
+    useEffect(() => {
         setModelResponseSettings({
             modelName: modelName,
             systemPrompt: systemPromptText,
-            preloadPrompt: preloadPrompt,
             modelLevelFlashAttention: modelLevelFlashAttention,
+            contextLevelFlashAttention: contextLevelFlashAttenion,
+            contextSize: contextSize,
             responseSettings: {
-                contextSize: contextSize,
                 temperature: temperature,
                 maxTokens: maxTokens,
-                contextLevelFlashAttention: responseLevelFlashAttenion,
                 minP: minP,
                 topP: topP,
                 topK: topK,
-                seed: seed,
-                responsePrefix: responsePrefix
+                seed: seed
             }
-        }),
-        [
-            modelName,
-            systemPromptText,
-            preloadPrompt,
-            modelLevelFlashAttention,
-            contextSize,
-            temperature,
-            maxTokens,
-            responseLevelFlashAttenion,
-            minP,
-            topP,
-            topK,
-            seed,
-            responsePrefix
-        ];
-    };
+        });
+    }, [
+        modelName,
+        systemPromptText,
+        modelLevelFlashAttention,
+        contextSize,
+        temperature,
+        maxTokens,
+        contextLevelFlashAttenion,
+        minP,
+        topP,
+        topK,
+        seed
+    ]);
 
     return (
         <div className="flex flex-col flex-grow justify-center items-center">
@@ -109,52 +93,42 @@ function ModelSettings({
                         </p>
                     </InfoTooltip>
                 </LabelAndInput>
-                <LabelAndInput
-                    type="select"
-                    selectText="Select Preload Prompt"
-                    infoIcon={true}
-                    onValueChange={(value) => {
-                        const selected = promptsAndFilenames!.find((item) => item.filename === value);
-                        setPreloadPrompt(selected!.prompt.prompt);
-                    }}
-                    items={promptsAndFilenames!.map((item) => {
-                        return {item: item.prompt.name, value: item.filename};
-                    })}
-                >
-                    Preload Prompt
-                    <InfoTooltip>
-                        <p>
-                            You can preload a user prompt onto the context sequence state to make the response start being generated sooner
-                            when the final prompt is given.
-                        </p>
-                        <p>
-                            This won't speed up inference if you call the <span className="font-code">.prompt()</span> function immediately
-                            after preloading the prompt, but can greatly improve initial response times if you preload a prompt before the
-                            user gives it.
-                        </p>
-                    </InfoTooltip>
-                </LabelAndInput>
-                <LabelAndInput type="textarea" value={preloadPrompt} infoIcon={false} onValueChange={(value) => setPreloadPrompt(value)}>
-                    Preload Prompt Preview
-                </LabelAndInput>
-                <LabelAndInput
-                    type="checkbox"
-                    infoIcon={true}
-                    value={modelLevelFlashAttention}
-                    onValueChange={(bool) => setModelLevelFlashAttention(bool)}
-                >
-                    Model Level Flash Attention
-                    <InfoTooltip>
-                        <p>
-                            Flash attention is an optimization in the attention mechanism that makes inference faster, more efficient and
-                            uses less memory.
-                        </p>
-                        <p>
-                            The support for flash attention is currently experimental and may not always work as expected. Use with caution.
-                        </p>
-                        <p>This option will be ignored if flash attention is not supported by the model.</p>
-                    </InfoTooltip>
-                </LabelAndInput>
+                <div className="flex flex-row justify-around">
+                    <LabelAndInput
+                        type="checkbox"
+                        infoIcon={true}
+                        value={modelLevelFlashAttention}
+                        onValueChange={(bool) => setModelLevelFlashAttention(bool)}
+                    >
+                        Model Level Flash Attention
+                        <InfoTooltip>
+                            <p>
+                                Flash attention is an optimization in the attention mechanism that makes inference faster, more efficient
+                                and uses less memory.
+                            </p>
+                            <p>
+                                The support for flash attention is currently experimental and may not always work as expected. Use with
+                                caution.
+                            </p>
+                            <p>This option will be ignored if flash attention is not supported by the model.</p>
+                        </InfoTooltip>
+                    </LabelAndInput>
+                    <LabelAndInput
+                        type="checkbox"
+                        value={contextLevelFlashAttenion}
+                        infoIcon={true}
+                        onValueChange={(bool) => setContextLevelFlashAttenion(bool)}
+                    >
+                        Context Level Flash Attention
+                        <InfoTooltip>
+                            <p>
+                                You can also enable flash attention for an individual context when creating it, but doing that is less
+                                optimized as the model may get loaded with less GPU layers since it expected the context to use much more
+                                VRAM than it actually does due to flash attention:
+                            </p>
+                        </InfoTooltip>
+                    </LabelAndInput>
+                </div>
                 <div className="flex gap-[5px] items-center w-full">
                     <Separator className="flex-1" />
                     <Label className="w-fit text-[15px]">Response Settings</Label>
@@ -164,12 +138,12 @@ function ModelSettings({
                     <div className="flex flex-col w-[50%] gap-[10px]">
                         <LabelAndInput
                             type="slider"
-                            value={contextSize}
+                            value={contextSize === "auto" ? 0 : contextSize}
                             sliderMaxValue={8192}
                             stepValue={1024}
                             setZeroToAuto={true}
                             infoIcon={true}
-                            onValueChange={setContextSize}
+                            onValueChange={(num) => (num === 0 ? setContextSize("auto") : setContextSize(num))}
                         >
                             Context Size
                             <InfoTooltip>
@@ -208,23 +182,6 @@ function ModelSettings({
                         >
                             Max Tokens
                         </LabelAndInput>
-                        <div className="flex gap-[10px] items-center h-full">
-                            <LabelAndInput
-                                type="checkbox"
-                                value={responseLevelFlashAttenion}
-                                infoIcon={true}
-                                onValueChange={(bool) => setResponseLevelFlashAttenion(bool)}
-                            >
-                                Response Level Flash Attention
-                                <InfoTooltip>
-                                    <p>
-                                        You can also enable flash attention for an individual context when creating it, but doing that is
-                                        less optimized as the model may get loaded with less GPU layers since it expected the context to use
-                                        much more VRAM than it actually does due to flash attention:
-                                    </p>
-                                </InfoTooltip>
-                            </LabelAndInput>
-                        </div>
                     </div>
                     <Separator orientation="vertical" className="h-full flex-none mx-[20px]" />
                     <div className="flex flex-col w-[50%] gap-[10px]">
@@ -305,22 +262,9 @@ function ModelSettings({
                         </LabelAndInput>
                     </div>
                 </div>
-                <LabelAndInput type="textarea" value={responsePrefix} infoIcon={true} onValueChange={setResponsePrefix}>
-                    Response Prefix
-                    <InfoTooltip>
-                        <p>
-                            Force a given text prefix to be the start of the model response, to make the model follow a certain direction.
-                        </p>
-                        <p>
-                            May cause some models to not use the given functions in some scenarios where they would have been used
-                            otherwise, so avoid using it together with function calling if you notice unexpected behavior.
-                        </p>
-                    </InfoTooltip>
-                </LabelAndInput>
 
                 <Button
                     onClick={() => {
-                        updateModelResponseSettings();
                         loadModelAndSession();
                     }}
                     disabled={modelName === "" || modelName === undefined}
@@ -371,7 +315,7 @@ type LabelAndSliderProps = {
     stepValue: number,
     setZeroToAuto: boolean,
     disabled?: boolean,
-    onValueChange?: React.Dispatch<React.SetStateAction<number>>
+    onValueChange?: React.Dispatch<React.SetStateAction<any>>
 };
 
 type LabelAndCheckboxProps = {

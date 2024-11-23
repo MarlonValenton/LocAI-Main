@@ -5,22 +5,37 @@ import {IpcMainInvokeEvent} from "electron";
 import ChatSessionFile from "../../src/interfaces/ChatSession";
 import ChatSessionAndFilename from "../../src/interfaces/ChatSessionAndFilename";
 import LocaiConfig from "../../src/interfaces/locaiconfig";
+import ResponseSettings from "../../src/interfaces/ResponseSettings";
 
 const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
 
-export async function createChatSessionFile(event: IpcMainInvokeEvent, modelPath: string): Promise<ChatSessionAndFilename> {
+export async function createChatSessionFile(
+    event: IpcMainInvokeEvent,
+    modelPath: string,
+    responseSettings: ResponseSettings,
+    systemPrompt: string,
+    modelLevelFlashAttention: boolean,
+    contextLevelFlashAttention: boolean,
+    contextSize: number
+): Promise<ChatSessionAndFilename> {
     const chatSession: ChatSessionFile = {
         name: "New chat session",
         modelPath: modelPath,
         modelName: path.basename(modelPath),
         inputTokens: 0,
         outputTokens: 0,
+        systemPrompt: systemPrompt,
+        initialResponseSettings: responseSettings,
+        modelLevelFlashAttention: modelLevelFlashAttention,
+        contextLevelFlashAttention: contextLevelFlashAttention,
+        contextSize: contextSize,
         chatHistory: [
             {
                 type: "system",
-                text: configFile.systemPrompt
+                text: systemPrompt!
             }
-        ]
+        ],
+        responseSettingsHistory: []
     };
 
     await fs.mkdir(configFile.chatSessionsDirectory, {recursive: true});

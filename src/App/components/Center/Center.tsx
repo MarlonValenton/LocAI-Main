@@ -3,7 +3,6 @@
 import {useEffect} from "react";
 import {LlmState} from "../../../../electron/state/llmState";
 import Error from "../../../icons/exclamation-circle.svg?react";
-import PromptAndFilename from "../../../interfaces/PromptAndFilename";
 import ModelResponseSettings from "../../../interfaces/ModelResponseSettings";
 import ModelSettings from "./ModelSettings";
 import ChatArea from "./ChatArea/ChatArea";
@@ -16,8 +15,8 @@ interface CenterProps {
     error?: string,
     loadMessage?: string,
     isShowSystemPrompt: boolean,
-    promptsAndFilenames?: PromptAndFilename[],
     modelResponseSettings: ModelResponseSettings,
+    isDarkMode: boolean,
     children: JSX.Element[],
     setisSystemPrompt: React.Dispatch<React.SetStateAction<boolean>>,
     setModelResponseSettings: React.Dispatch<React.SetStateAction<ModelResponseSettings>>,
@@ -32,8 +31,8 @@ function Center({
     error,
     loadMessage,
     isShowSystemPrompt,
-    promptsAndFilenames,
     modelResponseSettings,
+    isDarkMode,
     children,
     setisSystemPrompt,
     setModelResponseSettings,
@@ -68,7 +67,6 @@ function Center({
             ) : !loaded ? (
                 <ModelSettings
                     loadModelAndSession={loadModelAndSession}
-                    promptsAndFilenames={promptsAndFilenames}
                     modelResponseSettings={modelResponseSettings}
                     setModelResponseSettings={setModelResponseSettings}
                 />
@@ -77,6 +75,7 @@ function Center({
                     simplifiedChat={state.chatSession.simplifiedChat}
                     isShowSystemPrompt={isShowSystemPrompt}
                     generatingResult={generatingResult}
+                    isDarkMode={isDarkMode}
                 />
             )}
             {children[1]}

@@ -3,7 +3,8 @@ import ResponseSettings from "./ResponseSettings";
 export default interface ModelResponseSettings {
     modelName: string | undefined,
     systemPrompt: string,
-    preloadPrompt: string | undefined,
     modelLevelFlashAttention: boolean,
+    contextLevelFlashAttention: boolean,
+    contextSize: number | "auto",
     responseSettings: ResponseSettings
 }

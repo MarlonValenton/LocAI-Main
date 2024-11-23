@@ -5,6 +5,7 @@
 /// <reference types="../src/interfaces/locaiconfig" />
 /// <reference types="../src/interfaces/PromptAndFilename" />
 /// <reference types="../src/interfaces/Prompt" />
+/// <reference types="../src/interfaces/ResponseSettings" />
 
 declare namespace NodeJS {
     interface ProcessEnv {
@@ -42,7 +43,14 @@ interface Window {
         /**
          * Create a chat session file
          */
-        createChatSessionFile(modelPath: string): Promise<ChatSessionAndFilename>,
+        createChatSessionFile(
+            modelPath: string,
+            responseSettings: ResponseSettings,
+            systemPrompt: string,
+            modelLevelFlashAttention: boolean,
+            contextLevelFlashAttention: boolean,
+            contextSize: number | "auto"
+        ): Promise<ChatSessionAndFilename>,
         /**
          * Save chat session to file
          */

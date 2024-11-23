@@ -5,7 +5,8 @@ export default interface LocaiConfig {
     chatSessionsDirectory: string,
     promptsDirectory: string,
     systemPrompt: string,
-    preloadPrompt: string | undefined,
     modelLevelFlashAttention: false,
+    contextLevelFlashAttention: false,
+    contextSize: number | "auto",
     responseSettings: ResponseSettings
 }

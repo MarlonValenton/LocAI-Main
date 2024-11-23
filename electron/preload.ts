@@ -5,6 +5,7 @@ import {ExportDialogType} from "../src/interfaces/dialog";
 import LocaiConfig from "../src/interfaces/locaiconfig";
 import PromptAndFilename from "../src/interfaces/PromptAndFilename";
 import Prompt from "../src/interfaces/Prompt";
+import ResponseSettings from "../src/interfaces/ResponseSettings";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
@@ -32,8 +33,23 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 contextBridge.exposeInMainWorld("utils", {
     getModelFiles: (): Promise<string[]> => ipcRenderer.invoke("get-model-files"),
     getChatSessions: (): Promise<ChatSessionAndFilename[]> => ipcRenderer.invoke("get-chat-sessions"),
-    createChatSessionFile: (modelPath: string): Promise<ChatSessionAndFilename> =>
-        ipcRenderer.invoke("create-chat-session-file", modelPath),
+    createChatSessionFile: (
+        modelPath: string,
+        responseSettings: ResponseSettings,
+        systemPrompt: string,
+        modelLevelFlashAttention: boolean,
+        contextLevelFlashAttention: boolean,
+        contextSize: number | "auto"
+    ): Promise<ChatSessionAndFilename> =>
+        ipcRenderer.invoke(
+            "create-chat-session-file",
+            modelPath,
+            responseSettings,
+            systemPrompt,
+            modelLevelFlashAttention,
+            contextLevelFlashAttention,
+            contextSize
+        ),
     saveChatSession: (filename: string, chatSession: ChatSession): Promise<void> =>
         ipcRenderer.invoke("save-chat-session", filename, chatSession),
     chatSessionExists: (filename: string): Promise<boolean> => ipcRenderer.invoke("chat-session-exists", filename),

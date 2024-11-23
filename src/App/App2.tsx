@@ -15,6 +15,7 @@ import LocaiConfig from "../interfaces/locaiconfig";
 import PromptAndFilename from "../interfaces/PromptAndFilename";
 import {ChatSessionValues, PromptValues} from "../interfaces/EditItemValues";
 import ModelResponseSettings from "../interfaces/ModelResponseSettings";
+import ResponseSettings from "../interfaces/ResponseSettings";
 import Center from "./components/Center/Center";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SideBarButton from "./components/Sidebar/SidebarButton";
@@ -35,8 +36,9 @@ window.utils.getConfig().then((value: LocaiConfig) => {
     settings = {
         modelName: undefined,
         systemPrompt: value.systemPrompt,
-        preloadPrompt: value.preloadPrompt,
         modelLevelFlashAttention: value.modelLevelFlashAttention,
+        contextLevelFlashAttention: value.contextLevelFlashAttention,
+        contextSize: value.contextSize,
         responseSettings: {
             ...value.responseSettings
         }
@@ -44,7 +46,7 @@ window.utils.getConfig().then((value: LocaiConfig) => {
 });
 
 function App2(): JSX.Element {
-    const [isDarkMode, setDarkMode] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
     const [chatSessionsAndFilenames, setChatSessionsAndFilenames] = useState<ChatSessionAndFilename[]>([]);
     const [promptsAndFilenames, setPromptsAndFilenames] = useState<PromptAndFilename[]>([]);
     const [selectedChatSession, setSelectedChatSession] = useState<ChatSession>();
@@ -91,7 +93,11 @@ function App2(): JSX.Element {
                             ...chatSessionAndFilename.chatSession,
                             inputTokens: state.chatSession.usedInputTokens!,
                             outputTokens: state.chatSession.usedOutputTokens!,
-                            chatHistory: state.chatSession.chatHistory
+                            chatHistory: state.chatSession.chatHistory,
+                            responseSettingsHistory: [
+                                ...(chatSessionAndFilename.chatSession.responseSettingsHistory as ResponseSettings[]),
+                                modelResponseSettings.responseSettings
+                            ]
                         }
                     };
                     console.log({newChatSessionAndFilename});
@@ -135,31 +141,43 @@ function App2(): JSX.Element {
 
                 console.log(`${selectedChatSession?.modelName} === ${chatSession?.modelName}`);
 
+                console.log("Unloading chat session");
                 await electronLlmRpc.setChatSessionLoad();
+
                 if (selectedChatSession?.modelName === chatSession?.modelName) {
                     console.log("Selected chat session is the same as the old one, loading Chat History immediately");
 
                     // await electronLlmRpc.loadModel(chatSession!.modelPath);
                     console.log("Creating Context");
-                    await electronLlmRpc.createContext();
+                    await electronLlmRpc.createContext(chatSession!.contextSize, chatSession!.contextLevelFlashAttention);
 
                     console.log("Creating Context");
                     await electronLlmRpc.createContextSequence();
 
                     console.log("Loading Chat History");
-                    await electronLlmRpc.loadChatHistory(chatSession!.chatHistory!, chatSession!.inputTokens, chatSession!.outputTokens);
+                    await electronLlmRpc.loadChatHistory(
+                        chatSession!.chatHistory!,
+                        chatSession!.inputTokens,
+                        chatSession!.outputTokens,
+                        chatSession!.systemPrompt
+                    );
                 } else {
                     console.log("Loading Model");
-                    await electronLlmRpc.loadModel(chatSession!.modelPath);
+                    await electronLlmRpc.loadModel(chatSession!.modelPath, chatSession!.modelLevelFlashAttention);
 
                     console.log("Creating Context");
-                    await electronLlmRpc.createContext();
+                    await electronLlmRpc.createContext(chatSession!.contextSize, chatSession!.contextLevelFlashAttention);
 
                     console.log("Creating Context Sequence");
                     await electronLlmRpc.createContextSequence();
 
                     console.log("Loading Chat History");
-                    await electronLlmRpc.loadChatHistory(chatSession!.chatHistory!, chatSession!.inputTokens, chatSession!.outputTokens);
+                    await electronLlmRpc.loadChatHistory(
+                        chatSession!.chatHistory!,
+                        chatSession!.inputTokens,
+                        chatSession!.outputTokens,
+                        chatSession!.systemPrompt
+                    );
                 }
 
                 // setSelectedModel(chatSession!.modelPath);
@@ -267,7 +285,7 @@ function App2(): JSX.Element {
             const updatedChatSessionsAndFilenames = await getChatSessions();
             console.log("Updating chatSessionsAndFilenames first");
 
-            const newChatSessionAndFilename: ChatSessionAndFilename = await createChatSessionFile(modelResponseSettings.modelName);
+            const newChatSessionAndFilename: ChatSessionAndFilename = await createChatSessionFile();
             console.log(`Created new chat session file: ${newChatSessionAndFilename.filename}`);
 
             setSelectedChatSession(newChatSessionAndFilename.chatSession);
@@ -279,7 +297,7 @@ function App2(): JSX.Element {
             setChatSessionSelectedIndex(updatedChatSessionsAndFilenames.length);
             console.log("Selected chat session index");
 
-            await electronLlmRpc.loadModelAndSession(modelResponseSettings.modelName);
+            await electronLlmRpc.loadModelAndSession(modelResponseSettings);
             await saveChatSession(newChatSessionAndFilename);
         }
     }, [modelResponseSettings]);
@@ -288,9 +306,23 @@ function App2(): JSX.Element {
         return await window.utils.getChatSessions();
     }, []);
 
-    const createChatSessionFile = useCallback(async (modelFilePath: string) => {
-        return await window.utils.createChatSessionFile(modelFilePath);
-    }, []);
+    const createChatSessionFile = useCallback(async () => {
+        return await window.utils.createChatSessionFile(
+            modelResponseSettings.modelName!,
+            modelResponseSettings.responseSettings,
+            modelResponseSettings.systemPrompt,
+            modelResponseSettings.modelLevelFlashAttention,
+            modelResponseSettings.contextLevelFlashAttention,
+            modelResponseSettings.contextSize
+        );
+    }, [
+        modelResponseSettings.modelName,
+        modelResponseSettings.responseSettings,
+        modelResponseSettings.systemPrompt,
+        modelResponseSettings.modelLevelFlashAttention,
+        modelResponseSettings.contextLevelFlashAttention,
+        modelResponseSettings.contextSize
+    ]);
 
     const getPrompts = useCallback(async () => {
         return await window.utils.getPrompts();
@@ -404,9 +436,9 @@ function App2(): JSX.Element {
         (prompt: string) => {
             if (generatingResult) return;
 
-            void electronLlmRpc.prompt(prompt);
+            void electronLlmRpc.prompt(prompt, modelResponseSettings.responseSettings);
         },
-        [generatingResult]
+        [generatingResult, modelResponseSettings.responseSettings]
     );
 
     const updateChatSessions = useCallback(() => {
@@ -604,7 +636,7 @@ function App2(): JSX.Element {
                     <SideBarButton display="Clear Conversations" Icon={Trash} />
                     <SideBarButton display="Export Data" Icon={FileExport} />
                     <SideBarButton display="Settings" Icon={Settings} />
-                    <Button onClick={() => setDarkMode((isDarkMode) => !isDarkMode)}>Dark Mode</Button>
+                    <Button onClick={() => setIsDarkMode((isDarkMode) => !isDarkMode)}>Dark Mode</Button>
                 </SidebarButtonGroup>
             </Sidebar>
             <Center
@@ -614,9 +646,9 @@ function App2(): JSX.Element {
                 loading={loading}
                 error={error}
                 loadMessage={loadMessage}
-                promptsAndFilenames={promptsAndFilenames}
                 modelResponseSettings={modelResponseSettings}
                 isShowSystemPrompt={isShowSystemPrompt}
+                isDarkMode={isDarkMode}
                 setModelResponseSettings={setModelResponseSettings}
                 loadModelAndSession={loadModelAndSession}
                 setisSystemPrompt={setisSystemPrompt}

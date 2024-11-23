@@ -21,6 +21,7 @@ import "./input.css";
 // fix visible chatarea for a split second when deleting
 // rename is* useStates
 // model settings slider inputs not scrolling when too long
+// check if tooltips are correct
 
 // potential tests
 // deleting an item that isn't your selected item

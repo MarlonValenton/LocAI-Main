@@ -7,10 +7,11 @@ interface ChatHistoryProps {
     simplifiedChat?: LlmState["chatSession"]["simplifiedChat"],
     chatHistory?: ChatHistoryItem[],
     isShowSystemPrompt: boolean,
-    generatingResult?: boolean
+    generatingResult?: boolean,
+    isDarkMode: boolean
 }
 
-function ChatArea({simplifiedChat, chatHistory, isShowSystemPrompt, generatingResult}: ChatHistoryProps) {
+function ChatArea({simplifiedChat, chatHistory, isShowSystemPrompt, generatingResult, isDarkMode}: ChatHistoryProps) {
     const chatAreaRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -49,7 +50,7 @@ function ChatArea({simplifiedChat, chatHistory, isShowSystemPrompt, generatingRe
                 ? simplifiedChat.map((item, index) => {
                     if ((item.type !== "system" && !isShowSystemPrompt) || isShowSystemPrompt) {
                         return (
-                            <ChatSingle key={index} index={index} type={item.type}>
+                            <ChatSingle key={index} index={index} type={item.type} isDarkMode={isDarkMode}>
                                 {item.message}
                             </ChatSingle>
                         );
@@ -58,7 +59,7 @@ function ChatArea({simplifiedChat, chatHistory, isShowSystemPrompt, generatingRe
                 : chatHistory!.map((item, index) => {
                     if ((item.type !== "system" && !isShowSystemPrompt) || isShowSystemPrompt) {
                         return (
-                            <ChatSingle key={index} index={index} type={item.type}>
+                            <ChatSingle key={index} index={index} type={item.type} isDarkMode={isDarkMode}>
                                 {item.type === "model" ? item.response[0]!.toString() : item.text.toString()}
                             </ChatSingle>
                         );
