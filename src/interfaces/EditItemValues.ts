@@ -4,7 +4,11 @@ interface PromptValues {
     prompt: string
 }
 interface ChatSessionValues {
-    name: string
+    name: string,
+    systemPrompt: string,
+    contextSize: number | "auto",
+    modelLevelFlashAttention: boolean,
+    contextLevelFlashAttention: boolean
 }
 
 export type EditItemValues = PromptValues | ChatSessionValues;

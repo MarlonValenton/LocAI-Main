@@ -10,45 +10,73 @@ import useClickOutside from "../../../hooks/useClickOutside";
 import ChatSessionAndFilename from "../../../interfaces/ChatSessionAndFilename";
 import {cn} from "../../../lib/utils";
 import PromptAndFilename from "../../../interfaces/PromptAndFilename";
-import {DeleteChatSessionDialog} from "../Dialogs/DeleteChatSessionDialog";
 import {DeletePromptDialog} from "../Dialogs/DeletePromptDialog";
 import {Dialog} from "../../shadcncomponents/dialog";
 import {EditPromptDialog} from "../Dialogs/EditPromptDialog";
 import {EditItemValues} from "../../../interfaces/EditItemValues";
+import {DeleteChatsessionDialog} from "../Dialogs/DeleteChatSessionDialog2";
+import {EditChatSessionDialog} from "../Dialogs/EditChatSessionDialog";
 
 interface SpecialButtonProps {
     item: ChatSessionAndFilename | PromptAndFilename,
     index: number,
     disabled?: boolean,
+    isDarkMode: boolean,
     onClick(): void,
+    renameItem(index: number, values: EditItemValues): void,
     editItem(index: number, values: EditItemValues): void,
     deleteItem(index: number): void,
     exportItem(): void
 }
 
-function SpecialButton({item, index, disabled, onClick, editItem, deleteItem, exportItem}: SpecialButtonProps): JSX.Element {
+function SpecialButton({
+    item,
+    index,
+    disabled,
+    isDarkMode,
+    onClick,
+    renameItem,
+    editItem,
+    deleteItem,
+    exportItem
+}: SpecialButtonProps): JSX.Element {
     const [isEditMode, setIsEditMode] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>("");
     const [dialogType, setDialogType] = useState<"delete" | "edit">();
     const ref = useRef<HTMLInputElement>(null);
     useClickOutside(ref, () => setIsEditMode(false));
 
+    let dropdownLabel: string;
+
+    if ("chatSession" in item) {
+        dropdownLabel = "Edit Chat Session";
+    } else dropdownLabel = "Edit Prompt";
+
     return (
         <div
             onClick={() => (disabled !== undefined ? (!disabled ? onClick() : "") : onClick())}
             onKeyDownCapture={(e) => {
-                if ("chatSession" in item) {
-                    if (e.key === "Escape") {
-                        console.log("Escape key entered. Removing input element");
-                        setIsEditMode(false);
-                    } else if (e.key === "Tab") {
-                        console.log("Tab key entered. Resetting input element");
-                        e.preventDefault();
-                        setInputValue(item.chatSession.name);
-                    } else if (e.key === "Enter") {
-                        editItem(index, {name: inputValue});
-                        setIsEditMode(false);
-                    }
+                if (e.key === "Escape") {
+                    console.log("Escape key entered. Removing input element");
+                    setIsEditMode(false);
+                } else if (e.key === "Tab") {
+                    console.log("Tab key entered. Resetting input element");
+                    e.preventDefault();
+                    setInputValue("chatSession" in item ? item.chatSession.name : item.prompt.name);
+                } else if (e.key === "Enter") {
+                    renameItem(
+                        index,
+                        "chatSession" in item
+                            ? {
+                                name: inputValue,
+                                systemPrompt: item.chatSession.systemPrompt,
+                                contextSize: item.chatSession.contextSize,
+                                modelLevelFlashAttention: item.chatSession.modelLevelFlashAttention,
+                                contextLevelFlashAttention: item.chatSession.contextLevelFlashAttention
+                            }
+                            : {name: inputValue, description: item.prompt.description, prompt: item.prompt.prompt}
+                    );
+                    setIsEditMode(false);
                 }
             }}
             className={cn(
@@ -79,83 +107,77 @@ function SpecialButton({item, index, disabled, onClick, editItem, deleteItem, ex
             )}
             {!isEditMode ? (
                 <div className="flex flex-1 justify-end items-center">
-                    {"chatSession" in item ? (
-                        <DeleteChatSessionDialog deleteItem={() => deleteItem(index)} chatSessionAndFilename={item}>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger className="flex items-center">
-                                    <Dots className="text-icon-gray size-[20px]" />
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
+                    <Dialog>
+                        <DropdownMenu modal={false}>
+                            <DropdownMenuTrigger className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                                <Dots className="text-icon-gray size-[20px]" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        exportItem();
+                                    }}
+                                >
+                                    Export
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setInputValue("chatSession" in item ? item.chatSession.name : item.prompt.name);
+                                        setIsEditMode(true);
+                                        // setInputValue("chatSession" in item ? item.chatSession.name : item.prompt.name);
+                                    }}
+                                >
+                                    Rename
+                                </DropdownMenuItem>
+                                <DialogTrigger
+                                    asChild
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setDialogType("edit");
+                                    }}
+                                >
                                     <DropdownMenuItem
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            exportItem();
                                         }}
                                     >
-                                        Export
+                                        {dropdownLabel}
                                     </DropdownMenuItem>
+                                </DialogTrigger>
+                                <DialogTrigger
+                                    asChild
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setDialogType("delete");
+                                    }}
+                                >
                                     <DropdownMenuItem
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setInputValue(item.chatSession.name);
-                                            setIsEditMode(true);
-                                            // setInputValue("chatSession" in item ? item.chatSession.name : item.prompt.name);
-                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="text-negative font-semibold focus:bg-negative/50 dark:focus:bg-negative/30 focus:text-negative"
                                     >
-                                        Edit
+                                        Delete
                                     </DropdownMenuItem>
-                                    <DialogTrigger asChild>
-                                        <DropdownMenuItem
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="text-negative font-semibold focus:bg-negative/50 dark:focus:bg-negative/30 focus:text-negative"
-                                        >
-                                            Delete
-                                        </DropdownMenuItem>
-                                    </DialogTrigger>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </DeleteChatSessionDialog>
-                    ) : (
-                        <Dialog>
-                            <DropdownMenu modal={false}>
-                                <DropdownMenuTrigger className="flex items-center" onClick={(e) => e.stopPropagation()}>
-                                    <Dots className="text-icon-gray size-[20px]" />
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            exportItem();
-                                        }}
-                                    >
-                                        Export
-                                    </DropdownMenuItem>
-                                    <DialogTrigger asChild onClick={() => setDialogType("edit")}>
-                                        <DropdownMenuItem
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            Edit
-                                        </DropdownMenuItem>
-                                    </DialogTrigger>
-                                    <DialogTrigger asChild onClick={() => setDialogType("delete")}>
-                                        <DropdownMenuItem
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="text-negative font-semibold focus:bg-negative/50 dark:focus:bg-negative/30 focus:text-negative"
-                                        >
-                                            Delete
-                                        </DropdownMenuItem>
-                                    </DialogTrigger>
-                                </DropdownMenuContent>
-                                {dialogType === "edit" ? (
-                                    <EditPromptDialog index={index} prompt={item} editItem={editItem}></EditPromptDialog>
+                                </DialogTrigger>
+                            </DropdownMenuContent>
+                            {dialogType === "edit" ? (
+                                "chatSession" in item ? (
+                                    <EditChatSessionDialog index={index} chatSessionAndFilename={item} editItem={editItem} />
                                 ) : (
-                                    <DeletePromptDialog prompt={item} deleteItem={() => deleteItem(index)} />
-                                )}
-                            </DropdownMenu>
-                        </Dialog>
-                    )}
+                                    <EditPromptDialog index={index} prompt={item} editItem={editItem}></EditPromptDialog>
+                                )
+                            ) : "chatSession" in item ? (
+                                <DeleteChatsessionDialog
+                                    chatSessionAndFilename={item}
+                                    isDarkMode={isDarkMode}
+                                    deleteItem={() => deleteItem(index)}
+                                />
+                            ) : (
+                                <DeletePromptDialog prompt={item} deleteItem={() => deleteItem(index)} />
+                            )}
+                        </DropdownMenu>
+                    </Dialog>
                 </div>
             ) : (
                 ""

@@ -5,12 +5,12 @@ import RightArrowBar from "../../../icons/arrow-bar-right.svg?react";
 
 function StatusBar({children}: {children?: JSX.Element[] | JSX.Element}): JSX.Element {
     return (
-        <div className="flex flex-row h-[40px] flex-shrink-0 items-center justify-center [&>*:not(:last-child)]:mr-1 mb-[10px]">
-            <LeftArrowBar className="text-primary" />
-            <div className="flex flex-grow flex-row border border-border-gray dark:border-none bg-white dark:bg-background-light p-[10px] rounded-[5px] h-full items-center justify-center [&>*:not(:last-child)]:mr-10">
+        <div className="flex flex-row h-[40px] flex-shrink-0 items-center justify-center gap-[5px]">
+            {/* <LeftArrowBar className="text-primary" /> */}
+            <div className="flex flex-row flex-grow border border-border-gray dark:border-none bg-white dark:bg-background-light p-[10px] rounded-[5px] h-full items-center justify-center gap-[10px]">
                 {children}
             </div>
-            <RightArrowBar className="text-primary" />
+            {/* <RightArrowBar className="text-primary" /> */}
         </div>
     );
 }

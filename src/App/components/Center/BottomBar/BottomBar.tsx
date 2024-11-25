@@ -1,10 +1,10 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {Input} from "../../shadcncomponents/Input";
-import Bolt from "../../../icons/bolt.svg?react";
-import Send from "../../../icons/send.svg?react";
-import Stop from "../../../icons/player-stop.svg?react";
-import {Button} from "../../shadcncomponents/Button";
+import {Input} from "../../../shadcncomponents/Input";
+import Bolt from "../../../../icons/bolt.svg?react";
+import Send from "../../../../icons/send.svg?react";
+import Stop from "../../../../icons/player-stop.svg?react";
+import {Button} from "../../../shadcncomponents/Button";
 
 interface BottomBarProps {
     children?: JSX.Element | JSX.Element[]
@@ -39,8 +39,6 @@ function BottomBarInput({
     stopGeneration,
     submitPrompt
 }: BottomBarInputProps) {
-    console.log(document.querySelector("html")?.classList.value === "dark");
-
     return (
         <Input
             ref={inputRef}
@@ -88,19 +86,6 @@ function BottomBarInput({
     );
 }
 
-interface QuickSettingsProps {
-    children?: JSX.Element[] | JSX.Element
-}
-function QuickSettings({children}: QuickSettingsProps): JSX.Element {
-    return (
-        <>
-            <div className="flex flex-row items-center justify-center w-[500px] bg-foreground h-[40px] rounded-[5px] [&>*:not(:last-child)]:mr-5">
-                {children}
-            </div>
-        </>
-    );
-}
-
 interface QuickSettingsItemProps {
     icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>,
     onClick?(...args: any): void
@@ -115,4 +100,4 @@ function QuickSettingsItem({icon, onClick}: QuickSettingsItemProps): JSX.Element
     );
 }
 
-export {BottomBar, BottomBarInput, QuickSettings, QuickSettingsItem};
+export {BottomBar, BottomBarInput, QuickSettingsItem};

@@ -20,7 +20,7 @@ export async function createChatSessionFile(
 ): Promise<ChatSessionAndFilename> {
     const chatSession: ChatSessionFile = {
         name: "New chat session",
-        modelPath: modelPath,
+        modelPath: path.resolve(modelPath),
         modelName: path.basename(modelPath),
         inputTokens: 0,
         outputTokens: 0,

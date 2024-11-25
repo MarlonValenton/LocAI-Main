@@ -12,8 +12,10 @@ interface SidebarCenterProps {
     items?: ChatSessionAndFilename[] | PromptAndFilename[],
     inputValue: string,
     selectedIndex?: number,
+    isDarkMode?: boolean,
     setSelectedIndex: React.Dispatch<React.SetStateAction<number | undefined>>,
     OnSelectItem(index: number): void,
+    renameItem(index: number, values: EditItemValues): void,
     editItem(index: number, values: EditItemValues): void,
     deleteItem(index: number): void,
     exportItem(index: number): void
@@ -22,8 +24,10 @@ function SidebarCenter({
     items,
     inputValue,
     selectedIndex,
+    isDarkMode,
     setSelectedIndex,
     OnSelectItem,
+    renameItem,
     editItem,
     deleteItem,
     exportItem
@@ -53,7 +57,7 @@ function SidebarCenter({
             className={cn(
                 "flex flex-col flex-grow pl-[8px] items-center text-icon-gray [&>*:not(:last-child)]:mb-[10px] overflow-auto",
                 !filteredItems?.length ? "justify-center" : "",
-                (items![0]! as unknown as PromptAndFilename[]) ? "pb-[8px]" : ""
+                items ? ((items![0]! as unknown as PromptAndFilename[]) ? "pb-[8px]" : "") : ""
             )}
             style={{scrollbarGutter: "stable"}}
         >
@@ -64,10 +68,12 @@ function SidebarCenter({
                         key={index}
                         index={index}
                         disabled={"chatSession" in item ? (index === selectedIndex ? true : false) : undefined}
+                        isDarkMode={isDarkMode!}
                         onClick={() => {
                             setSelectedIndex(index);
                             OnSelectItem(index);
                         }}
+                        renameItem={renameItem}
                         editItem={editItem}
                         deleteItem={deleteItem}
                         exportItem={() => exportItem(index)}

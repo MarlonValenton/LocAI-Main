@@ -15,7 +15,7 @@ export default function PromptForm({name, description, prompt, setName, setDescr
     return (
         <div className="flex flex-col gap-[15px] px-[15px] py-[15px]">
             <div className="flex flex-col gap-[10px]">
-                <Label>Name</Label>
+                <Label className="select-none">Name</Label>
                 <Input
                     onChange={(e) => (setName ? setName(e.currentTarget.value) : null)}
                     value={name}
@@ -24,7 +24,7 @@ export default function PromptForm({name, description, prompt, setName, setDescr
                 />
             </div>
             <div className="flex flex-col gap-[10px]">
-                <Label>Description</Label>
+                <Label className="select-none">Description</Label>
                 <Textarea
                     value={description}
                     onChange={(e) => (setDescription ? setDescription(e.currentTarget.value) : null)}
@@ -33,7 +33,7 @@ export default function PromptForm({name, description, prompt, setName, setDescr
                 />
             </div>
             <div className="flex flex-col gap-[10px]">
-                <Label>Prompt</Label>
+                <Label className="select-none">Prompt</Label>
                 <Textarea
                     className="min-h-[200px] resize-none"
                     onChange={(e) => {

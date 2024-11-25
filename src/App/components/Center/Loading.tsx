@@ -9,7 +9,7 @@ interface LoadingProps {
 }
 function Loading({progress, children}: LoadingProps) {
     return (
-        <div className="flex flex-col gap-[30px] justify-center items-center w-full h-full">
+        <div className="flex flex-col gap-[30px] justify-center items-center w-full h-full select-none">
             <div className="flex gap-[10px] items-center">
                 <Loader className="size-[24px] text-primary animate-spin" />
                 {children}

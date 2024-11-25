@@ -1,10 +1,10 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {LlmState} from "../../../../electron/state/llmState";
 import Error from "../../../icons/exclamation-circle.svg?react";
 import ModelResponseSettings from "../../../interfaces/ModelResponseSettings";
-import ModelSettings from "./ModelSettings";
+import ModelSettings from "./ModelSettings/ModelSettings";
 import ChatArea from "./ChatArea/ChatArea";
 import Loading from "./Loading";
 interface CenterProps {
@@ -38,21 +38,35 @@ function Center({
     setModelResponseSettings,
     loadModelAndSession
 }: CenterProps): JSX.Element {
+    const [systemPromptChecked, setSystemPromptChecked] = useState<boolean>(false);
+
     useEffect(() => {
-        if (state.chatSession.simplifiedChat.length) {
-            state.chatSession.simplifiedChat.some((item) => {
-                if (item.type === "system") {
-                    setisSystemPrompt(true);
-                    console.log("true");
-                    return true;
-                } else {
-                    setisSystemPrompt(false);
-                    console.log("false");
-                    return false;
-                }
-            });
-        } else setisSystemPrompt(false);
-    }, [loading, error]);
+        if (!systemPromptChecked) {
+            if (state.chatSession.simplifiedChat.length) {
+                state.chatSession.simplifiedChat.some((item) => {
+                    if (item.type === "system") {
+                        setisSystemPrompt(true);
+                        console.log("System is supported");
+                        return true;
+                    } else {
+                        setisSystemPrompt(false);
+                        console.log("System is not supported");
+                        return false;
+                    }
+                });
+
+                setSystemPromptChecked(true);
+                console.log("Set systemPromptChecked to true");
+            } else setisSystemPrompt(false);
+        }
+    }, [generatingResult]);
+
+    useEffect(() => {
+        if (!loaded) {
+            setSystemPromptChecked(false);
+            console.log("Set systemPromptChecked to false");
+        }
+    }, [loaded]);
 
     return (
         <div className="flex flex-col p-[8px] pt-[8px] pb-[30px] h-screen w-full">
@@ -68,6 +82,7 @@ function Center({
                 <ModelSettings
                     loadModelAndSession={loadModelAndSession}
                     modelResponseSettings={modelResponseSettings}
+                    loaded={loaded}
                     setModelResponseSettings={setModelResponseSettings}
                 />
             ) : (

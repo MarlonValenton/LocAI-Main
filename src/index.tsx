@@ -22,6 +22,8 @@ import "./input.css";
 // rename is* useStates
 // model settings slider inputs not scrolling when too long
 // check if tooltips are correct
+// stronger functional component typing (refer to IconToggle)
+// add system prompt visibility in settings
 
 // potential tests
 // deleting an item that isn't your selected item
@@ -30,6 +32,7 @@ import "./input.css";
 // pressing another chat session when it is still loading
 // empty chat session and prompt
 // stopping a generating prompt and making sure that the response is still saved
+// test if system icon toggle disappears
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     // <React.StrictMode>

@@ -9,11 +9,12 @@ import ExtraInformationDialog from "./ExtraInformationDialog";
 
 interface DeleteDialogProps {
     chatSessionAndFilename: ChatSessionAndFilename,
+    isDarkMode: boolean,
     children?: JSX.Element,
     deleteItem(): void
 }
 
-export function DeleteChatSessionDialog({chatSessionAndFilename, children, deleteItem}: DeleteDialogProps) {
+export function DeleteChatSessionDialog({chatSessionAndFilename, isDarkMode, children, deleteItem}: DeleteDialogProps) {
     const [isShowSystemPrompt, setIsShowSystemPrompt] = useState<boolean>(false);
 
     return (
@@ -37,14 +38,26 @@ export function DeleteChatSessionDialog({chatSessionAndFilename, children, delet
                         contentClassName="h-fit max-h-[450px]"
                     />
                     <div className="h-[calc(100vh/2)] overflow-auto">
-                        <ChatArea chatHistory={chatSessionAndFilename.chatSession.chatHistory} isShowSystemPrompt={isShowSystemPrompt} />
+                        <ChatArea
+                            chatHistory={chatSessionAndFilename.chatSession.chatHistory}
+                            isShowSystemPrompt={isShowSystemPrompt}
+                            isDarkMode={isDarkMode}
+                        />
                     </div>
                     <DialogFooter className="border-border-gray border-t-[1px] px-[15px] py-[10px]">
                         <div className="flex gap-[10px] flex-grow items-center">
                             <Switch
                                 checked={isShowSystemPrompt}
                                 onCheckedChange={() => setIsShowSystemPrompt((value) => !value)}
-                                disabled={chatSessionAndFilename.chatSession.chatHistory![0]?.type !== "system"}
+                                disabled={
+                                    chatSessionAndFilename.chatSession.chatHistory
+                                        ? chatSessionAndFilename.chatSession.chatHistory.length
+                                            ? chatSessionAndFilename.chatSession.chatHistory[0]!.type !== "system"
+                                                ? true
+                                                : false
+                                            : true
+                                        : true
+                                }
                             />
                             System prompt visibility
                         </div>

@@ -78,13 +78,13 @@ export class ElectronLlmRpc {
         async loadChatHistory(chatHistory: ChatHistoryItem[], inputTokens: number, outputTokens: number, systemPrompt: string) {
             await llmFunctions.chatSession.loadChatHistory(chatHistory, inputTokens, outputTokens, systemPrompt);
         },
-        async unload() {
-            await llmFunctions.unload();
+        async unloadObjects() {
+            await llmFunctions.unloadObjects();
         },
         async clearErrors() {
             await llmFunctions.clearErrors();
         },
-        setChatSessionLoad: llmFunctions.chatSession.setChatSessionLoad,
+        unloadChatSession: llmFunctions.chatSession.unloadChatSession,
         getState() {
             return llmState.state;
         },

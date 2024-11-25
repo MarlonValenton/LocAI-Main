@@ -21,7 +21,7 @@ export function EditPromptDialog({index, prompt, editItem}: EditDialogProps) {
     return (
         <div onClick={(e) => e.stopPropagation()}>
             <DialogContent className="max-w-[40%] p-0 m-0 gap-0">
-                <DialogHeader className="px-[15px] pt-[15px] pb-[10px] border-border-gray border-b-[1px] h-fit">
+                <DialogHeader className="px-[15px] pt-[15px] pb-[10px] border-border-gray border-b-[1px] h-fit select-none">
                     <DialogTitle>Edit Prompt</DialogTitle>
                 </DialogHeader>
                 <ExtraInformationDialog

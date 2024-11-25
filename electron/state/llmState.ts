@@ -543,6 +543,15 @@ export const llmFunctions = {
                     console.log(systemPrompt);
                 } else console.log("systemPrompt is empty");
 
+                const newChatHistory = chatHistory.map((item) => {
+                    if (item.type === "system") {
+                        return {
+                            type: "system",
+                            text: systemPrompt
+                        };
+                    } else return item;
+                });
+
                 if (contextSequence == null) throw new Error("Context sequence not loaded");
 
                 if (chatSession != null) {
@@ -572,7 +581,7 @@ export const llmFunctions = {
 
                     llmFunctions.chatSession.resetChatHistory(false, systemPrompt);
 
-                    chatSession?.setChatHistory(chatHistory);
+                    chatSession?.setChatHistory(newChatHistory as ChatHistoryItem[]);
 
                     contextSequence?.tokenMeter.useTokens(inputTokens, "input");
                     contextSequence?.tokenMeter.useTokens(outputTokens, "output");
@@ -619,7 +628,7 @@ export const llmFunctions = {
                 }
             });
         },
-        setChatSessionLoad() {
+        unloadChatSession() {
             llmState.state = {
                 ...llmState.state,
                 chatSession: {
@@ -640,8 +649,8 @@ export const llmFunctions = {
             };
         });
     },
-    async unload() {
-        await withLock(llmFunctions, "unload", async () => {
+    async unloadObjects() {
+        await withLock(llmFunctions, "unloadObjects", async () => {
             console.log("Unloading objects");
 
             llmState.state.selectedModelFilePath = undefined;
