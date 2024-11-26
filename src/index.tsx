@@ -1,9 +1,8 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
-import {App} from "./App/App.tsx";
 import App2 from "./App/App2.tsx";
 // import "./index.css";
 import "./input.css";
+import ModelResponseSettings from "./interfaces/ModelResponseSettings.ts";
 
 // TO DO
 // Remove dark mode button
@@ -34,12 +33,37 @@ import "./input.css";
 // stopping a generating prompt and making sure that the response is still saved
 // test if system icon toggle disappears
 
+const initSettings = await window.utils.getConfig();
+const initModelResponseSettings: ModelResponseSettings = {
+    modelName: undefined,
+    systemPrompt: initSettings.systemPrompt,
+    modelLevelFlashAttention: initSettings.modelLevelFlashAttention,
+    contextLevelFlashAttention: initSettings.contextLevelFlashAttention,
+    contextSize: initSettings.contextSize,
+    responseSettings: {
+        ...initSettings.responseSettings
+    }
+};
+const initChatSessionsAndFilenames = await window.utils.getChatSessions();
+const initPromptsAndFilenames = await window.utils.getPrompts();
+
+console.log("Initial Settings:");
+console.log(initSettings);
+console.log("Initial chat sessions: ");
+console.log(initChatSessionsAndFilenames);
+console.log("Initial prompts: ");
+console.log(initPromptsAndFilenames);
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
     // <React.StrictMode>
     //     {/* <App /> */}
     //     <App2 />
     // </React.StrictMode>
-    <App2 />
+    <App2
+        initModelResponseSettings={initModelResponseSettings}
+        initChatSessionsandFilenames={initChatSessionsAndFilenames}
+        initPromptsAndFilenames={initPromptsAndFilenames}
+    />
 );
 
 // Use contextBridge

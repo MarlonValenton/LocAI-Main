@@ -30,41 +30,20 @@ import QuickSettings from "./components/Center/BottomBar/QuickSettings";
 import CreatePromptDialog from "./components/Dialogs/CreatePromptDialog";
 import {Dialog, DialogContent, DialogTrigger} from "./shadcncomponents/dialog";
 
-let settings: ModelResponseSettings;
-window.utils.getConfig().then((value: LocaiConfig) => {
-    settings = {
-        modelName: undefined,
-        systemPrompt: value.systemPrompt,
-        modelLevelFlashAttention: value.modelLevelFlashAttention,
-        contextLevelFlashAttention: value.contextLevelFlashAttention,
-        contextSize: value.contextSize,
-        responseSettings: {
-            ...value.responseSettings
-        }
-    };
-});
-let csaf: ChatSessionAndFilename[];
-window.utils.getChatSessions().then((value: ChatSessionAndFilename[]) => {
-    csaf = value;
-});
-
-function App2(): JSX.Element {
+interface App2Props {
+    initModelResponseSettings: ModelResponseSettings,
+    initChatSessionsandFilenames: ChatSessionAndFilename[],
+    initPromptsAndFilenames: PromptAndFilename[]
+}
+function App2({initModelResponseSettings, initChatSessionsandFilenames, initPromptsAndFilenames}: App2Props): JSX.Element {
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const [chatSessionsAndFilenames, setChatSessionsAndFilenames] = useState<ChatSessionAndFilename[]>(csaf);
-    const [promptsAndFilenames, setPromptsAndFilenames] = useState<PromptAndFilename[]>([]);
+    const [chatSessionsAndFilenames, setChatSessionsAndFilenames] = useState<ChatSessionAndFilename[]>(initChatSessionsandFilenames);
+    const [promptsAndFilenames, setPromptsAndFilenames] = useState<PromptAndFilename[]>(initPromptsAndFilenames);
     const [selectedChatSession, setSelectedChatSession] = useState<ChatSession>();
     const [loadMessage, setloadMessage] = useState<string>();
     const state = useExternalState(llmState);
-    const [modelResponseSettings, setModelResponseSettings] = useState<ModelResponseSettings>(settings);
+    const [modelResponseSettings, setModelResponseSettings] = useState<ModelResponseSettings>(initModelResponseSettings);
     const {generatingResult} = state.chatSession;
-
-    useEffect(() => {
-        // console.log("Getting chat sessions from file system");
-        // getChatSessions().then((value) => setChatSessionsAndFilenames(value));
-
-        console.log("Getting prompts from file system");
-        getPrompts().then((value) => setPromptsAndFilenames(value));
-    }, []);
 
     useEffect(() => {
         console.log(`generating result ${generatingResult}`);
@@ -113,6 +92,10 @@ function App2(): JSX.Element {
             document.querySelector("html")?.classList.add("dark");
         }
     }, [isDarkMode]);
+
+    const getConfigSettings = useCallback(async () => {
+        return await window.utils.getConfig();
+    }, []);
 
     const loadConfigSettings = useCallback(() => {
         console.log("Loading config settings");

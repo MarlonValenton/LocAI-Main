@@ -1,6 +1,9 @@
 import {fileURLToPath} from "node:url";
 import path from "node:path";
+import {readFileSync} from "node:fs";
+import fs from "node:fs/promises";
 import {app, shell, BrowserWindow, ipcMain} from "electron";
+import LocaiConfig from "../src/interfaces/locaiconfig.ts";
 import {registerLlmRpc} from "./rpc/llmRpc.ts";
 import {getModelFiles} from "./utils/getModelFiles.ts";
 import {getChatSessions} from "./utils/getChatSessions.ts";
@@ -15,6 +18,14 @@ import {getPrompts} from "./utils/getPrompts.ts";
 import {promptExists} from "./utils/promptExists.ts";
 import {savePrompt} from "./utils/savePrompt.ts";
 import {deletePrompt} from "./utils/deletePrompt.ts";
+
+const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+
+console.log("Creating necessary folders");
+
+await fs.mkdir(configFile.chatSessionsDirectory, {recursive: true});
+await fs.mkdir(configFile.modelsDirectory, {recursive: true});
+await fs.mkdir(configFile.promptsDirectory, {recursive: true});
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // The built directory structure
