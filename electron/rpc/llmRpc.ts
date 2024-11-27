@@ -1,13 +1,16 @@
 import path from "node:path";
+import {readFileSync} from "node:fs";
 import fs from "node:fs/promises";
 import {BrowserWindow, dialog} from "electron";
 import {ChatHistoryItem} from "node-llama-cpp";
 import {createElectronSideBirpc} from "../utils/createElectronSideBirpc.ts";
 import {llmFunctions, llmState} from "../state/llmState.ts";
 import ModelResponseSettings from "../../src/interfaces/ModelResponseSettings.ts";
+import LocaiConfig from "../../src/interfaces/locaiconfig.ts";
 import type {RenderedFunctions} from "../../src/rpc/llmRpc.ts";
 
-const modelDirectoryPath = path.join(process.cwd(), "models");
+const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+const modelDirectoryPath = configFile.modelsDirectory;
 
 export class ElectronLlmRpc {
     public readonly rendererLlmRpc: ReturnType<typeof createElectronSideBirpc<RenderedFunctions, typeof this.functions>>;

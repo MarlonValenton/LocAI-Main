@@ -52,8 +52,8 @@ function createWindow() {
         icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
         webPreferences: {
             preload: path.join(__dirname, "preload.mjs"),
-            devTools: true,
-            nodeIntegration: true
+            devTools: !app.isPackaged,
+            nodeIntegration: false
         },
         width: 1280,
         height: 720,
@@ -62,6 +62,7 @@ function createWindow() {
         autoHideMenuBar: true
     });
     win.setAspectRatio(16 / 9);
+    win.setTitle("LocAi");
     registerLlmRpc(win);
 
     // open external links in the default browser
@@ -80,7 +81,7 @@ function createWindow() {
     if (VITE_DEV_SERVER_URL) void win.loadURL(VITE_DEV_SERVER_URL);
     else void win.loadFile(path.join(RENDERER_DIST, "index.html"));
 
-    win.webContents.openDevTools();
+    !app.isPackaged ? win.webContents.openDevTools() : null;
 }
 
 ipcMain.handle("get-model-files", getModelFiles);
