@@ -11,7 +11,7 @@
 !macroend
 
 !macro customUnWelcomePage
-  !define MUI_WELCOMEPAGE_TEXT "You are about to uninstall LocAi from your computer.$\r$\n$\r$\nAll installed files will be permanently deleted from your computer while user-generated files will remain.$\r$\nPlease Check your local and roaming app data folder for any remaining files"
+  !define MUI_WELCOMEPAGE_TEXT "You are about to uninstall LocAi from your computer.$\r$\n$\r$\nAll installed files will be permanently deleted from your computer while user-generated files will remain.$\r$\n$\r$\nPlease Check your local and roaming app data folder for any remaining files."
   !insertmacro MUI_UNPAGE_WELCOME
 !macroend
 
