@@ -1,6 +1,6 @@
-import {readFileSync} from "node:fs";
 import LocaiConfig from "../../src/interfaces/locaiconfig";
+import {configFile} from "..";
 
 export function getConfig(): LocaiConfig {
-    return JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+    return configFile;
 }

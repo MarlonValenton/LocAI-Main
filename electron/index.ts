@@ -19,13 +19,99 @@ import {promptExists} from "./utils/promptExists.ts";
 import {savePrompt} from "./utils/savePrompt.ts";
 import {deletePrompt} from "./utils/deletePrompt.ts";
 
-const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+let configFile: LocaiConfig;
 
-console.log("Creating necessary folders");
+try {
+    if (
+        await fs
+            .stat("locaiconfig.json")
+            .then(() => true)
+            .catch(() => false)
+    ) {
+        console.log("Creating necessary folders");
 
-await fs.mkdir(configFile.chatSessionsDirectory, {recursive: true});
-await fs.mkdir(configFile.modelsDirectory, {recursive: true});
-await fs.mkdir(configFile.promptsDirectory, {recursive: true});
+        configFile = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+
+        await fs.mkdir("chat_sessions", {recursive: true});
+        await fs.mkdir("models", {recursive: true});
+        await fs.mkdir("prompts", {recursive: true});
+
+        if (configFile.chatSessionsDirectory === null) {
+            configFile.chatSessionsDirectory = "chat_sessions";
+            await fs.writeFile("locaiconfig.json", JSON.stringify(configFile, null, 2), "utf-8");
+        }
+
+        if (configFile.modelsDirectory === null) {
+            configFile.modelsDirectory = "models";
+            await fs.writeFile("locaiconfig.json", JSON.stringify(configFile, null, 2), "utf-8");
+        }
+
+        if (configFile.promptsDirectory === null) {
+            configFile.promptsDirectory = "prompts";
+            await fs.writeFile("locaiconfig.json", JSON.stringify(configFile, null, 2), "utf-8");
+        }
+    } else {
+        await fs.mkdir("chat_sessions", {recursive: true});
+        await fs.mkdir("models", {recursive: true});
+        await fs.mkdir("prompts", {recursive: true});
+
+        configFile = {
+            modelsDirectory: "models",
+            chatSessionsDirectory: "chat_sessions",
+            promptsDirectory: "prompts",
+            systemPrompt:
+                "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. If a question does not make any sense, or is not factually coherent, explain why instead of answering something incorrectly. If you don't know the answer to a question, don't share false information.",
+            modelLevelFlashAttention: true,
+            contextLevelFlashAttention: false,
+            contextSize: 4096,
+            responseSettings: {
+                temperature: 0.4,
+                maxTokens: 10000,
+                minP: 0.2,
+                topP: 0.1,
+                topK: 0.7,
+                seed: 1
+            }
+        };
+
+        await fs.writeFile("locaiconfig.json", JSON.stringify(configFile, null, 2), "utf-8");
+    }
+} catch (e) {
+    console.log("Asd");
+
+    const appDataLocAi = path.join(app.getPath("appData"), "LocAi Data");
+    const appDataLocAiModels = path.join(appDataLocAi, "models");
+    const appDataLocAiChatSessions = path.join(appDataLocAi, "chat_sessions");
+    const appDataLocAiPrompts = path.join(appDataLocAi, "prompts");
+
+    await fs.mkdir(appDataLocAi, {recursive: true});
+    await fs.mkdir(appDataLocAiModels, {recursive: true});
+    await fs.mkdir(appDataLocAiChatSessions, {recursive: true});
+    await fs.mkdir(appDataLocAiPrompts, {recursive: true});
+
+    configFile = {
+        modelsDirectory: appDataLocAiModels,
+        chatSessionsDirectory: appDataLocAiChatSessions,
+        promptsDirectory: appDataLocAiPrompts,
+        systemPrompt:
+            "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. If a question does not make any sense, or is not factually coherent, explain why instead of answering something incorrectly. If you don't know the answer to a question, don't share false information.",
+        modelLevelFlashAttention: true,
+        contextLevelFlashAttention: false,
+        contextSize: 4096,
+        responseSettings: {
+            temperature: 0.4,
+            maxTokens: 10000,
+            minP: 0.2,
+            topP: 0.1,
+            topK: 0.7,
+            seed: 1
+        }
+    };
+
+    await fs.writeFile(path.join(appDataLocAi, "locaiconfig.json"), JSON.stringify(configFile, null, 2), "utf-8");
+}
+
+export {configFile};
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // The built directory structure
@@ -44,12 +130,13 @@ export const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
 
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+console.log(process.env.VITE_PUBLIC);
 
 let win: BrowserWindow | null;
 
 function createWindow() {
     win = new BrowserWindow({
-        icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+        icon: path.join(process.env.VITE_PUBLIC, "LocAi-01.ico"),
         webPreferences: {
             preload: path.join(__dirname, "preload.mjs"),
             devTools: !app.isPackaged,

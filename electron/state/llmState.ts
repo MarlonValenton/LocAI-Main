@@ -1,6 +1,5 @@
 import path from "node:path";
 import fs from "node:fs/promises";
-import {readFileSync} from "node:fs";
 import {
     ChatHistoryItem,
     getLlama,
@@ -13,8 +12,8 @@ import {
 } from "node-llama-cpp";
 import {withLock, State} from "lifecycle-utils";
 import packageJson from "../../package.json";
-import LocaiConfig from "../../src/interfaces/locaiconfig";
 import ResponseSettings from "../../src/interfaces/ResponseSettings";
+import {configFile} from "..";
 
 export const llmState = new State<LlmState>({
     appVersion: packageJson.version,
@@ -94,7 +93,7 @@ let chatSessionCompletionEngine: LlamaChatSessionPromptCompletionEngine | null =
 let promptAbortController: AbortController | null = null;
 let inProgressResponse: string = "";
 
-const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", "utf-8"));
+// const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", "utf-8"));
 
 export const llmFunctions = {
     async loadLlama() {

@@ -23,15 +23,12 @@ export default {
     directories: {
         output: "release"
     },
-    extraMetadata: {
-        postinstall: 'npx node-llama-cpp pull --dir ./models "hf:bartowski/codegemma-2b-GGUF/codegemma-2b-Q8_0.gguf"'
-    },
-
     downloadAlternateFFmpeg: false,
     portable: {requestExecutionLevel: "user", unpackDirName: false, splashImage: null},
     compression: "maximum",
     electronLanguages: "en-US",
-    icon: "public/vite.ico",
+    icon: "public/LocAi-01.ico",
+    beforePack: "./build/scripts/beforePack.ts",
 
     // remove this once you set up your own code signing for macOS
     async afterPack(context) {
@@ -44,42 +41,29 @@ export default {
             await $`codesign --force --deep --sign - ${appPath}`;
         }
     },
-    // files: [
-    //     "dist",
-    //     "dist-electron",
-    //     "!node_modules/node-llama-cpp/bins/**/*",
-    //     "node_modules/node-llama-cpp/bins/${os}-${arch}*/**/*",
-    //     "!node_modules/@node-llama-cpp/*/bins/**/*",
-    //     "node_modules/@node-llama-cpp/${os}-${arch}*/bins/**/*",
-    //     "!node_modules/node-llama-cpp/llama/localBuilds/**/*",
-    //     "node_modules/node-llama-cpp/llama/localBuilds/${os}-${arch}*/**/*"
-    // ],
     files: [
         "dist",
         "dist-electron",
-        "!src",
-        "**/*",
-        "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
-        "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
-        "!**/node_modules/*.d.ts",
-        "!**/node_modules/.bin",
-        "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
-        "!.editorconfig",
-        "!**/._*",
-        "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
-        "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
-        "!**/{appveyor.yml,.travis.yml,circle.yml}",
-        "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
         "!node_modules/node-llama-cpp/bins/**/*",
         "node_modules/node-llama-cpp/bins/${os}-${arch}*/**/*",
         "!node_modules/@node-llama-cpp/*/bins/**/*",
         "node_modules/@node-llama-cpp/${os}-${arch}*/bins/**/*",
         "!node_modules/node-llama-cpp/llama/localBuilds/**/*",
         "node_modules/node-llama-cpp/llama/localBuilds/${os}-${arch}*/**/*",
-        "!models",
         "!chat_sessions",
+        "!models",
         "!prompts",
-        "!.vscode"
+        "!.vscode",
+        "!electron",
+        "!public",
+        "!src",
+        "!*.*",
+        "!*.ts",
+        "!*.nsh",
+        "!*.json",
+        "!*.js",
+        "!*.md",
+        "!*.ps1"
     ],
 
     asarUnpack: ["node_modules/node-llama-cpp/bins", "node_modules/node-llama-cpp/llama/localBuilds", "node_modules/@node-llama-cpp/*"],
@@ -101,7 +85,7 @@ export default {
         target: [
             {
                 target: "nsis",
-                arch: ["x64", "arm64"]
+                arch: ["x64", "arm64", "ia32"]
             }
         ],
 
@@ -118,8 +102,9 @@ export default {
         deleteAppDataOnUninstall: true,
         createDesktopShortcut: "always",
         createStartMenuShortcut: true,
+        installerSidebar: "./build/banner.bmp",
 
-        include: "installer.nsh"
+        include: "./build/installer.nsh"
     },
     linux: {
         target: [
@@ -143,8 +128,5 @@ export default {
         category: "Utility",
 
         artifactName: "${name}.Linux.${version}.${arch}.${ext}"
-    },
-    extraFiles: {
-        filter: ["locaiconfig.json", "installer.nsh", "sample_model.ps1"]
     }
 } as Configuration;

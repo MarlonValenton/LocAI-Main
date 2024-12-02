@@ -1,13 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import {readFileSync} from "node:fs";
 import {IpcMainInvokeEvent} from "electron";
 import ChatSessionFile from "../../src/interfaces/ChatSession";
 import ChatSessionAndFilename from "../../src/interfaces/ChatSessionAndFilename";
-import LocaiConfig from "../../src/interfaces/locaiconfig";
 import ResponseSettings from "../../src/interfaces/ResponseSettings";
-
-const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+import {configFile} from "..";
 
 export async function createChatSessionFile(
     event: IpcMainInvokeEvent,

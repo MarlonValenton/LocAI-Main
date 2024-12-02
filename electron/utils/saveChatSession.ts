@@ -1,11 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import {readFileSync} from "node:fs";
 import {IpcMainInvokeEvent} from "electron";
 import ChatSessionFile from "../../src/interfaces/ChatSession";
-import LocaiConfig from "../../src/interfaces/locaiconfig";
-
-const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+import {configFile} from "..";
 
 export async function saveChatSession(event: IpcMainInvokeEvent, filename: string, chatSessionFile: ChatSessionFile): Promise<void> {
     await fs.mkdir(configFile.chatSessionsDirectory, {recursive: true});

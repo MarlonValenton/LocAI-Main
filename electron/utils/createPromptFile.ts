@@ -1,12 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import {readFileSync} from "node:fs";
 import {IpcMainInvokeEvent} from "electron";
-import LocaiConfig from "../../src/interfaces/locaiconfig";
 import Prompt from "../../src/interfaces/Prompt";
 import PromptAndFilename from "../../src/interfaces/PromptAndFilename";
-
-const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
+import {configFile} from "..";
 
 export async function createPromptFile(
     event: IpcMainInvokeEvent,

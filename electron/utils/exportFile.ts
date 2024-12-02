@@ -1,13 +1,9 @@
-import {readFileSync} from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import {dialog, IpcMainInvokeEvent} from "electron";
-import {BrowserWindow} from "..";
+import {BrowserWindow, configFile} from "..";
 import {ExportDialogType} from "../../src/interfaces/dialog";
 import ChatSession from "../../src/interfaces/ChatSession";
-import LocaiConfig from "../../src/interfaces/locaiconfig";
-
-const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", "utf-8"));
 
 export async function exportFile(event: IpcMainInvokeEvent, type: ExportDialogType, item: ChatSession): Promise<void> {
     let options: Electron.SaveDialogOptions;

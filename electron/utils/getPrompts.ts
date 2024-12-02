@@ -1,9 +1,7 @@
 import {readdirSync, readFileSync} from "fs";
 import path from "path";
-import LocaiConfig from "../../src/interfaces/locaiconfig";
 import PromptAndFilename from "../../src/interfaces/PromptAndFilename";
-
-const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", "utf-8"));
+import {configFile} from "..";
 
 export function getPrompts(): PromptAndFilename[] {
     const promptPath = configFile.promptsDirectory;

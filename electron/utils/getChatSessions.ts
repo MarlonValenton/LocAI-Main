@@ -1,9 +1,7 @@
 import {readdirSync, readFileSync} from "fs";
 import path from "path";
 import ChatSessionAndFilename from "../../src/interfaces/ChatSessionAndFilename";
-import LocaiConfig from "../../src/interfaces/locaiconfig";
-
-const configFile: LocaiConfig = JSON.parse(readFileSync("./locaiconfig.json", "utf-8"));
+import {configFile} from "..";
 
 export function getChatSessions(): ChatSessionAndFilename[] {
     const chatSessionsPath = configFile.chatSessionsDirectory;

@@ -8,10 +8,7 @@ import Plus from "../icons/plus.svg?react";
 import ChatSession from "../interfaces/ChatSession";
 import {useExternalState} from "../hooks/useExternalState";
 import {llmState} from "../state/llmState";
-import {electronLlmRpc} from "../rpc/llmRpc";
 import ChatSessionAndFilename from "../interfaces/ChatSessionAndFilename";
-import {ExportDialogType} from "../interfaces/dialog";
-import LocaiConfig from "../interfaces/locaiconfig";
 import PromptAndFilename from "../interfaces/PromptAndFilename";
 import {ChatSessionValues, PromptValues} from "../interfaces/EditItemValues";
 import ModelResponseSettings from "../interfaces/ModelResponseSettings";
@@ -27,16 +24,7 @@ import loadConfigSettings from "../lib/loadConfigSettings";
 import {loadModelAndSession} from "../lib/modelUtils";
 import {createPromptFile, deletePrompt, editPrompt, loadPrompt, renamePrompt} from "../lib/promptUtils";
 import {exportFile, unloadObjects} from "../lib/miscUtils";
-import {
-    onInput,
-    onInputKeydown,
-    onPromptInput,
-    resizeInput,
-    sendPrompt,
-    setInputValue,
-    stopActivePrompt,
-    submitPrompt
-} from "../lib/promptInteractionUtils";
+import {onInput, onInputKeydown, setInputValue, stopActivePrompt, submitPrompt} from "../lib/promptInteractionUtils";
 import Center from "./components/Center/Center";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SideBarButton from "./components/Sidebar/SidebarButton";

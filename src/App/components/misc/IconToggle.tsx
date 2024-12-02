@@ -31,9 +31,10 @@ const IconToggle = forwardRef(function IconToggle(
                 }
             }}
         >
-            {isOn
+            {isOn ? children[0] : children[1]}
+            {/* {isOn
                 ? children.find(({type}) => type.toString() === IconToggleOnState.toString())
-                : children.find(({type}) => type.toString() === IconToggleOffState.toString())}
+                : children.find(({type}) => type.toString() === IconToggleOffState.toString())} */}
         </div>
     );
 });
