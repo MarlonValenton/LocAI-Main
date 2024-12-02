@@ -9,4 +9,4 @@ node_modules
 /models
 /chat_sessions
 /prompts
-./locaiconfig.json
+locaiconfig.json
