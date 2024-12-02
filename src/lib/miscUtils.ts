@@ -1,4 +1,5 @@
 import ChatSessionAndFilename from "../interfaces/ChatSessionAndFilename";
+import LocaiConfig from "../interfaces/locaiconfig";
 import PromptAndFilename from "../interfaces/PromptAndFilename";
 import {electronLlmRpc} from "../rpc/llmRpc";
 
@@ -20,6 +21,17 @@ async function exportFile(index: number, items?: (ChatSessionAndFilename | Promp
     }
 }
 
+async function saveConfig(config: LocaiConfig) {
+    console.log("Saving config file");
+    console.log({config});
+    await window.utils.saveConfig(config);
+}
+
+async function openPath(path: string) {
+    console.log(`Opening path: ${path}`);
+    await window.utils.openPath(path);
+}
+
 async function unloadObjects() {
     console.log("Unloading objects in state");
 
@@ -31,4 +43,4 @@ async function clearErrors() {
     await electronLlmRpc.clearErrors();
 }
 
-export {exportFile, unloadObjects, clearErrors};
+export {exportFile, unloadObjects, clearErrors, openPath, saveConfig};

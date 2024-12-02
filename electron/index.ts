@@ -2,7 +2,7 @@ import {fileURLToPath} from "node:url";
 import path from "node:path";
 import {readFileSync} from "node:fs";
 import fs from "node:fs/promises";
-import {app, shell, BrowserWindow, ipcMain} from "electron";
+import {app, shell, BrowserWindow, ipcMain, nativeTheme} from "electron";
 import LocaiConfig from "../src/interfaces/locaiconfig.ts";
 import {registerLlmRpc} from "./rpc/llmRpc.ts";
 import {getModelFiles} from "./utils/getModelFiles.ts";
@@ -18,8 +18,11 @@ import {getPrompts} from "./utils/getPrompts.ts";
 import {promptExists} from "./utils/promptExists.ts";
 import {savePrompt} from "./utils/savePrompt.ts";
 import {deletePrompt} from "./utils/deletePrompt.ts";
+import {openPath} from "./utils/openPath.ts";
+import saveConfig from "./utils/saveConfig.ts";
 
 let configFile: LocaiConfig;
+let configFilePath: string;
 
 try {
     if (
@@ -32,9 +35,9 @@ try {
 
         configFile = JSON.parse(readFileSync("./locaiconfig.json", {encoding: "utf-8"}));
 
-        await fs.mkdir("chat_sessions", {recursive: true});
         await fs.mkdir("models", {recursive: true});
         await fs.mkdir("prompts", {recursive: true});
+        await fs.mkdir("chat_sessions", {recursive: true});
 
         if (configFile.chatSessionsDirectory === null) {
             configFile.chatSessionsDirectory = "chat_sessions";
@@ -56,6 +59,7 @@ try {
         await fs.mkdir("prompts", {recursive: true});
 
         configFile = {
+            theme: nativeTheme.shouldUseDarkColors ? "dark" : "light",
             modelsDirectory: "models",
             chatSessionsDirectory: "chat_sessions",
             promptsDirectory: "prompts",
@@ -76,9 +80,9 @@ try {
 
         await fs.writeFile("locaiconfig.json", JSON.stringify(configFile, null, 2), "utf-8");
     }
-} catch (e) {
-    console.log("Asd");
 
+    configFilePath = path.resolve("locaiconfig.json");
+} catch (e) {
     const appDataLocAi = path.join(app.getPath("appData"), "LocAi Data");
     const appDataLocAiModels = path.join(appDataLocAi, "models");
     const appDataLocAiChatSessions = path.join(appDataLocAi, "chat_sessions");
@@ -89,29 +93,41 @@ try {
     await fs.mkdir(appDataLocAiChatSessions, {recursive: true});
     await fs.mkdir(appDataLocAiPrompts, {recursive: true});
 
-    configFile = {
-        modelsDirectory: appDataLocAiModels,
-        chatSessionsDirectory: appDataLocAiChatSessions,
-        promptsDirectory: appDataLocAiPrompts,
-        systemPrompt:
-            "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. If a question does not make any sense, or is not factually coherent, explain why instead of answering something incorrectly. If you don't know the answer to a question, don't share false information.",
-        modelLevelFlashAttention: true,
-        contextLevelFlashAttention: false,
-        contextSize: 4096,
-        responseSettings: {
-            temperature: 0.4,
-            maxTokens: 10000,
-            minP: 0.2,
-            topP: 0.1,
-            topK: 0.7,
-            seed: 1
-        }
-    };
+    configFilePath = path.join(appDataLocAi, path.resolve("locaiconfig.json"));
 
-    await fs.writeFile(path.join(appDataLocAi, "locaiconfig.json"), JSON.stringify(configFile, null, 2), "utf-8");
+    if (
+        await fs
+            .stat(configFilePath)
+            .then(() => true)
+            .catch(() => false)
+    ) {
+        null;
+    } else {
+        configFile = {
+            theme: nativeTheme.shouldUseDarkColors ? "dark" : "light",
+            modelsDirectory: appDataLocAiModels,
+            chatSessionsDirectory: appDataLocAiChatSessions,
+            promptsDirectory: appDataLocAiPrompts,
+            systemPrompt:
+                "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. If a question does not make any sense, or is not factually coherent, explain why instead of answering something incorrectly. If you don't know the answer to a question, don't share false information.",
+            modelLevelFlashAttention: true,
+            contextLevelFlashAttention: false,
+            contextSize: 4096,
+            responseSettings: {
+                temperature: 0.4,
+                maxTokens: 10000,
+                minP: 0.2,
+                topP: 0.1,
+                topK: 0.7,
+                seed: 1
+            }
+        };
+
+        await fs.writeFile(configFilePath, JSON.stringify(configFile, null, 2), "utf-8");
+    }
 }
 
-export {configFile};
+export {configFile, configFilePath};
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // The built directory structure
@@ -130,7 +146,6 @@ export const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
 
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
-console.log(process.env.VITE_PUBLIC);
 
 let win: BrowserWindow | null;
 
@@ -184,6 +199,8 @@ ipcMain.handle("get-prompts", getPrompts);
 ipcMain.handle("prompt-exists", promptExists);
 ipcMain.handle("save-prompt", savePrompt);
 ipcMain.handle("delete-prompt", deletePrompt);
+ipcMain.handle("open-path", openPath);
+ipcMain.handle("save-config", saveConfig);
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

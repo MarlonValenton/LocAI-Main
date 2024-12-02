@@ -1,6 +1,7 @@
 import ResponseSettings from "./ResponseSettings";
 
 export default interface LocaiConfig {
+    theme: "light" | "dark",
     modelsDirectory: string,
     chatSessionsDirectory: string,
     promptsDirectory: string,

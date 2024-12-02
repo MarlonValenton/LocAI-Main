@@ -61,5 +61,7 @@ contextBridge.exposeInMainWorld("utils", {
     getPrompts: (): Promise<PromptAndFilename> => ipcRenderer.invoke("get-prompts"),
     promptExists: (filename: string): Promise<boolean> => ipcRenderer.invoke("prompt-exists", filename),
     savePrompt: (filename: string, prompt: Prompt): Promise<boolean> => ipcRenderer.invoke("save-prompt", filename, prompt),
-    deletePrompt: (filename: string): Promise<void> => ipcRenderer.invoke("delete-prompt", filename)
+    deletePrompt: (filename: string): Promise<void> => ipcRenderer.invoke("delete-prompt", filename),
+    openPath: (path: string): Promise<void> => ipcRenderer.invoke("open-path", path),
+    saveConfig: (config: LocaiConfig): Promise<void> => ipcRenderer.invoke("save-config", config)
 });

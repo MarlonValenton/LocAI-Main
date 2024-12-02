@@ -2,7 +2,7 @@
 /// <reference types="../src/interfaces/ChatSession" />
 /// <reference types="../src/interfaces/ChatSessionAndFilename" />
 /// <reference types="../src/interfaces/dialog" />
-/// <reference types="../src/interfaces/locaiconfig" />
+/// <reference types="../src/interfaces/Locaiconfig" />
 /// <reference types="../src/interfaces/PromptAndFilename" />
 /// <reference types="../src/interfaces/Prompt" />
 /// <reference types="../src/interfaces/ResponseSettings" />
@@ -90,6 +90,14 @@ interface Window {
         /**
          * delete prompt
          */
-        deletePrompt(filename: string): Promise<void>
+        deletePrompt(filename: string): Promise<void>,
+        /**
+         * open path
+         */
+        openPath(path: string): Promise<void>,
+        /**
+         * save config file
+         */
+        saveConfig(config: LocaiConfig): Promise<void>
     }
 }

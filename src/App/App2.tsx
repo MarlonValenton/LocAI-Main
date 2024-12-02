@@ -25,6 +25,7 @@ import {loadModelAndSession} from "../lib/modelUtils";
 import {createPromptFile, deletePrompt, editPrompt, loadPrompt, renamePrompt} from "../lib/promptUtils";
 import {exportFile, unloadObjects} from "../lib/miscUtils";
 import {onInput, onInputKeydown, setInputValue, stopActivePrompt, submitPrompt} from "../lib/promptInteractionUtils";
+import LocaiConfig from "../interfaces/locaiconfig";
 import Center from "./components/Center/Center";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SideBarButton from "./components/Sidebar/SidebarButton";
@@ -39,14 +40,15 @@ import {BottomBar, BottomBarInput} from "./components/Center/BottomBar/BottomBar
 import QuickSettings from "./components/Center/BottomBar/QuickSettings";
 import CreatePromptDialog from "./components/Dialogs/CreatePromptDialog";
 import {Dialog, DialogContent, DialogTrigger} from "./shadcncomponents/dialog";
+import SettingsDialog from "./components/Dialogs/SettingsDialog";
 
 interface App2Props {
-    initModelResponseSettings: ModelResponseSettings,
+    initSettings: LocaiConfig,
     initChatSessionsandFilenames: ChatSessionAndFilename[],
     initPromptsAndFilenames: PromptAndFilename[]
 }
-function App2({initModelResponseSettings, initChatSessionsandFilenames, initPromptsAndFilenames}: App2Props): JSX.Element {
-    const [isDarkMode, setIsDarkMode] = useState(false);
+function App2({initSettings, initChatSessionsandFilenames, initPromptsAndFilenames}: App2Props): JSX.Element {
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(initSettings.theme === "dark" ? true : false);
 
     // Chat sessions
     const [chatSessionsAndFilenames, setChatSessionsAndFilenames] = useState<ChatSessionAndFilename[]>(initChatSessionsandFilenames);
@@ -68,7 +70,16 @@ function App2({initModelResponseSettings, initChatSessionsandFilenames, initProm
     const [isShowSystemPrompt, setIsShowSystemPrompt] = useState<boolean>(false);
 
     // settings
-    const [modelResponseSettings, setModelResponseSettings] = useState<ModelResponseSettings>(initModelResponseSettings);
+    const [modelResponseSettings, setModelResponseSettings] = useState<ModelResponseSettings>({
+        modelName: undefined,
+        systemPrompt: initSettings.systemPrompt,
+        modelLevelFlashAttention: initSettings.modelLevelFlashAttention,
+        contextLevelFlashAttention: initSettings.contextLevelFlashAttention,
+        contextSize: initSettings.contextSize,
+        responseSettings: {
+            ...initSettings.responseSettings
+        }
+    });
 
     // refs
     const inputRef = useRef<HTMLInputElement>(null);
@@ -245,8 +256,9 @@ function App2({initModelResponseSettings, initChatSessionsandFilenames, initProm
                 <SidebarButtonGroup>
                     <SideBarButton display="Clear Conversations" Icon={Trash} />
                     <SideBarButton display="Export Data" Icon={FileExport} />
-                    <SideBarButton display="Settings" Icon={Settings} />
-                    <Button onClick={() => setIsDarkMode((isDarkMode) => !isDarkMode)}>Dark Mode</Button>
+                    <SettingsDialog isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode}>
+                        <SideBarButton display="Settings" Icon={Settings} />
+                    </SettingsDialog>
                 </SidebarButtonGroup>
             </Sidebar>
             <Center

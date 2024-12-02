@@ -60,7 +60,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     //     <App2 />
     // </React.StrictMode>
     <App2
-        initModelResponseSettings={initModelResponseSettings}
+        initSettings={initSettings}
         initChatSessionsandFilenames={initChatSessionsAndFilenames}
         initPromptsAndFilenames={initPromptsAndFilenames}
     />

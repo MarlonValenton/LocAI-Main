@@ -16,6 +16,7 @@ type LabelAndSelectProps = {
     infoIcon?: boolean,
     selectText: string,
     items?: {item: string, value: string}[],
+    value?: string,
     onValueChange?: React.Dispatch<React.SetStateAction<string>>
 };
 
@@ -102,7 +103,7 @@ function LabelAndInput(labelAndInput: LabelAndInputProps) {
                 )}
             </span>
             {labelAndInput.type === "select" ? (
-                <Select onValueChange={labelAndInput.onValueChange}>
+                <Select onValueChange={labelAndInput.onValueChange} value={labelAndInput.value}>
                     <SelectTrigger className={cn("h-[35px] ml-[10px]", labelAndInput.infoIcon ? "ml-0" : "")}>
                         <SelectValue placeholder={labelAndInput.selectText} />
                     </SelectTrigger>
