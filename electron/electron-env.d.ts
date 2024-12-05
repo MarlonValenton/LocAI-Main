@@ -51,6 +51,10 @@ interface Window {
             contextLevelFlashAttention: boolean,
             contextSize: number | "auto"
         ): Promise<ChatSessionAndFilename>,
+        createChatSessionFileWithApi(
+            modelName: string,
+            role: string,
+        )
         /**
          * Save chat session to file
          */
