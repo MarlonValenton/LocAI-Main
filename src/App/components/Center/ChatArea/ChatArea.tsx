@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {ChatHistoryItem} from "node-llama-cpp";
 import {LlmState} from "../../../../../electron/state/llmState.ts";
 import ChatSingle from "./ChatSingle";
@@ -9,10 +9,14 @@ interface ChatHistoryProps {
     isShowSystemPrompt: boolean,
     generatingResult?: boolean,
     isDarkMode: boolean
+    apiPrompt():void,
+    groqApiResponse:string,
+    prompt:string
 }
 
-function ChatArea({simplifiedChat, chatHistory, isShowSystemPrompt, generatingResult, isDarkMode}: ChatHistoryProps) {
+function ChatArea({simplifiedChat, chatHistory, isShowSystemPrompt, generatingResult, isDarkMode, groqApiResponse, prompt}: ChatHistoryProps) {
     const chatAreaRef = useRef<HTMLDivElement>(null);
+
 
     useEffect(() => {
         console.log("Scrolling to bottom");
@@ -64,7 +68,16 @@ function ChatArea({simplifiedChat, chatHistory, isShowSystemPrompt, generatingRe
                             </ChatSingle>
                         );
                     } else return "";
-                })}
+                })
+            }
+            {groqApiResponse ? (
+                <ChatSingle index={chatHistory?.length || 0} type="model" isDarkMode={isDarkMode}>
+                    {`${prompt}
+                            \nResponse: ${groqApiResponse}`}
+                </ChatSingle>
+            ) : (
+                ""
+            )}
         </div>
     );
 }

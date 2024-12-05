@@ -20,7 +20,10 @@ interface CenterProps {
     children: JSX.Element[],
     setisSystemPrompt: React.Dispatch<React.SetStateAction<boolean>>,
     setModelResponseSettings: React.Dispatch<React.SetStateAction<ModelResponseSettings>>,
-    loadModelAndSession(): Promise<void>
+    loadModelAndSession(): Promise<void>,
+    apiPrompt(): void,
+    groqApiResponse: string,
+    prompt: string
 }
 
 function Center({
@@ -36,7 +39,10 @@ function Center({
     children,
     setisSystemPrompt,
     setModelResponseSettings,
-    loadModelAndSession
+    loadModelAndSession,
+    apiPrompt,
+    groqApiResponse,
+    prompt
 }: CenterProps): JSX.Element {
     const [systemPromptChecked, setSystemPromptChecked] = useState<boolean>(false);
 
@@ -91,6 +97,9 @@ function Center({
                     isShowSystemPrompt={isShowSystemPrompt}
                     generatingResult={generatingResult}
                     isDarkMode={isDarkMode}
+                    apiPrompt={apiPrompt}
+                    groqApiResponse={groqApiResponse}
+                    prompt={prompt}
                 />
             )}
             {children[1]}

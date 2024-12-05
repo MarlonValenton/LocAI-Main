@@ -6,4 +6,9 @@ interface ChatSessionAndFilename {
     chatSession: ChatSession
 }
 
-export default ChatSessionAndFilename;
+interface ChatSessionAndApi {
+    id: string,
+    chatSession: ChatSession
+}
+
+export type {ChatSessionAndFilename, ChatSessionAndApi};

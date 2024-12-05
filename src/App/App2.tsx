@@ -1,6 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import { ChatHistoryItem, ChatModelResponse, ChatUserMessage, ChatApiResponse, ChatApiModel } from "node-llama-cpp";
 import Trash from "../icons/trash.svg?react";
 import FileExport from "../icons/file-export.svg?react";
 import Settings from "../icons/settings.svg?react";
@@ -26,6 +27,7 @@ import {createPromptFile, deletePrompt, editPrompt, loadPrompt, renamePrompt} fr
 import {exportFile, unloadObjects} from "../lib/miscUtils";
 import {onInput, onInputKeydown, setInputValue, stopActivePrompt, submitPrompt} from "../lib/promptInteractionUtils";
 import LocaiConfig from "../interfaces/locaiconfig";
+import { callGroqApi } from "../lib/apiUtils";
 import Center from "./components/Center/Center";
 import Sidebar from "./components/Sidebar/Sidebar";
 import SideBarButton from "./components/Sidebar/SidebarButton";
@@ -61,6 +63,8 @@ function App2({initSettings, initChatSessionsandFilenames, initPromptsAndFilenam
     const [promptsAndFilenames, setPromptsAndFilenames] = useState<PromptAndFilename[]>(initPromptsAndFilenames);
     const [promptInputValue, setPromptInputValue] = useState<string>("");
     const [promptSelectedIndex, setPromptSelectedIndex] = useState<number>();
+    const [prompt, setPrompt] = useState<string>("")
+    const [groqApiResponse, setGroqApiResponse] = useState<string>("");
 
     // states
     const state = useExternalState(llmState);
@@ -168,6 +172,78 @@ function App2({initSettings, initChatSessionsandFilenames, initPromptsAndFilenam
     const loaded = state.chatSession.loaded;
     const showMessage = state.selectedModelFilePath == null || error != null || state.chatSession.simplifiedChat.length === 0;
 
+    // GroqTesting Debug
+    const apiPrompt = async (prompt: any) => {
+    // Get input value and trim it
+        prompt = inputRef.current?.value.trim();
+        if (!prompt || generatingResult) return; // Skip if no input or already generating
+        setPrompt(prompt);
+
+        // Create a new user message based on the type structure
+        const newMessage: ChatApiResponse = {
+            role: "user",
+            content: prompt
+            // role: "system",
+            // content: "You are a helpful AI assistant"
+        };
+
+        // Update the chat history with the user message
+        const updatedChatHistory: ChatHistoryItem[]  = [
+
+            newMessage
+        ];
+
+        // Update the UI state with the user's message
+        setSelectedChatSession({
+            ...selectedChatSession,
+            chatHistory: updatedChatHistory
+        });
+
+        // Clear the input field
+        setInputValue(setInputText, inputRef, autocompleteCurrentTextRef, "");
+
+        try {
+        // Show loading state
+            setloadMessage("Generating response...");
+
+            // Use default model if not specified
+            const modelName = "mixtral-8x7b-32768"
+
+            // Call Groq API
+            const groqResponse = await callGroqApi(updatedChatHistory, modelName);
+            const apireply =  groqResponse.choices?.[0]?.message?.content;
+
+            
+
+            // Extract and format the assistant's response
+            const assistantResponse: ChatApiModel = {
+                model: "model",
+                response: [
+                    groqResponse?.choices?.[0]?.message?.content || "No response received.",
+                ],
+            };
+            
+            setGroqApiResponse(apireply);
+            // Update the chat history with the assistant's response
+            const finalChatHistory: ChatHistoryItem[] = [
+                ...updatedChatHistory,
+                assistantResponse,
+            ];
+
+            setSelectedChatSession({
+                ...selectedChatSession,
+                chatHistory: finalChatHistory,
+            });
+
+            // Clear loading state
+            setloadMessage("");
+        } catch (error) {
+            console.error("Error generating response:", error);
+            setloadMessage("Error generating response.");
+        }
+    };
+    // GroqTestEnd
+
     // Sidebar chat session
 
     const updateStatesFromNewChatSession = useCallback(async () => {
@@ -262,6 +338,9 @@ function App2({initSettings, initChatSessionsandFilenames, initPromptsAndFilenam
                 </SidebarButtonGroup>
             </Sidebar>
             <Center
+                apiPrompt={apiPrompt}
+                groqApiResponse={groqApiResponse}
+                prompt={prompt}
                 state={state}
                 loaded={loaded}
                 generatingResult={generatingResult}
@@ -281,6 +360,14 @@ function App2({initSettings, initChatSessionsandFilenames, initPromptsAndFilenam
                         modelResponseSettings
                     )
                 }
+                loadApiModelAndSession={() =>
+                    loadApiModelAndSession(
+                        setloadMessage,
+                        setSelectedChatSession,
+                        setChatSessionSelectedIndex,
+                        modelResponseSettings
+                    )
+                }
                 setisSystemPrompt={setisSystemPrompt}
             >
                 <StatusBar>
@@ -296,6 +383,7 @@ function App2({initSettings, initChatSessionsandFilenames, initPromptsAndFilenam
                 </StatusBar>
                 <BottomBar>
                     <BottomBarInput
+                        apiPrompt={apiPrompt}
                         disabled={!loaded}
                         inputRef={inputRef}
                         inputText={inputText}

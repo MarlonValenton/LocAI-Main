@@ -2,6 +2,7 @@ import ChatSession from "../interfaces/ChatSession";
 import ChatSessionAndFilename from "../interfaces/ChatSessionAndFilename";
 import ModelResponseSettings from "../interfaces/ModelResponseSettings";
 import {electronLlmRpc} from "../rpc/llmRpc";
+import {callGroqApi} from "./apiUtils";
 import {saveChatSession} from "./chatSessionUtils";
 
 async function loadModelAndSession(
@@ -15,30 +16,64 @@ async function loadModelAndSession(
         console.log(`Loading ${modelResponseSettings.modelName}`);
         setloadMessage("Loading model");
 
-        const updatedChatSessionsAndFilenames = await window.utils.getChatSessions();
-        console.log("Updating chatSessionsAndFilenames first");
+        if (modelResponseSettings.isApiModel) {
+            // Handle API model logic
+            console.log("Detected API model. Calling Groq API...");
+            try {
+                // Use `callGroqApi` to interact with the API
+                const response = await callGroqApi(
+                    [{role: "user", content: "messages"}], // Example prompt
+                    modelResponseSettings.modelName as "" // Adjust the type as needed
+                );
+                console.log("Model loaded from API successfully:", response);
 
-        const newChatSessionAndFilename = await window.utils.createChatSessionFile(
+                // Update session states (use placeholders or basic session data)
+                const newChatSession: ChatSession = {
+                    id: Date.now().toString(),
+                    name: `Session with ${modelResponseSettings.modelName}`,
+                    messages: []
+                };
+                setSelectedChatSession(newChatSession);
+
+                // Add the session to the session list
+                setChatSessionsAndFilenames((prev) => [
+                    ...prev,
+                    {chatSession: newChatSession, filename: `api-session-${Date.now()}.json`}
+                ]);
+                setChatSessionSelectedIndex((prev) => (prev ? prev + 1 : 0));
+
+                setloadMessage(undefined); // Clear loading message
+            } catch (error) {
+                console.error("Error loading API model:", error);
+                setloadMessage("Failed to load API model. Check console for details.");
+            }
+        } else {
+
+            const updatedChatSessionsAndFilenames = await window.utils.getChatSessions();
+            console.log("Updating chatSessionsAndFilenames first");
+
+            const newChatSessionAndFilename = await window.utils.createChatSessionFile(
             modelResponseSettings.modelName!,
             modelResponseSettings.responseSettings,
             modelResponseSettings.systemPrompt,
             modelResponseSettings.modelLevelFlashAttention,
             modelResponseSettings.contextLevelFlashAttention,
             modelResponseSettings.contextSize
-        );
-        console.log(`Created new chat session file: ${newChatSessionAndFilename.filename}`);
+            );
+            console.log(`Created new chat session file: ${newChatSessionAndFilename.filename}`);
 
-        setSelectedChatSession(newChatSessionAndFilename.chatSession);
-        console.log("newChatSession set");
+            setSelectedChatSession(newChatSessionAndFilename.chatSession);
+            console.log("newChatSession set");
 
-        setChatSessionsAndFilenames([...updatedChatSessionsAndFilenames, newChatSessionAndFilename]);
-        console.log("Added newChatSession to existing chatSessions");
+            setChatSessionsAndFilenames([...updatedChatSessionsAndFilenames, newChatSessionAndFilename]);
+            console.log("Added newChatSession to existing chatSessions");
 
-        setChatSessionSelectedIndex(updatedChatSessionsAndFilenames.length);
-        console.log("Selected chat session index");
+            setChatSessionSelectedIndex(updatedChatSessionsAndFilenames.length);
+            console.log("Selected chat session index");
 
-        await electronLlmRpc.loadModelAndSession(modelResponseSettings);
-        await saveChatSession(newChatSessionAndFilename);
+            await electronLlmRpc.loadModelAndSession(modelResponseSettings);
+            await saveChatSession(newChatSessionAndFilename);
+        }
     }
 }
 
